@@ -38,29 +38,7 @@
     
     {% endif %}
 
-    {% for post in posts %}
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <div class="post">
-                    <span style="font-size: 1.25rem; font-weight: bold;" class="username">{{ post.user.username }}</span> <small>({{ post.created_at|timesince }} ago)</small>
-                    <p class="mt-2">{{ post.content }}</p>
-                </div>
-
-                <div style="display: inline-block;">
-                    <p>&#x2764; {{ post.likes_count }}</p>
-                </div>
-                <span style="font-size: 0.85rem; font-weight: bold;">Comments</span>
-                {% for comment in comments %}
-                <p>{{ comment.content }}</p>
-                <p>{{ comment.created_at|timesince }} ago</p>
-                {% endfor %}
-                <hr> <!-- Add hr tag here to separate each post -->
-                
-            </div>
-        </div>
-    </div>
-    {% endfor %}
+    <div id="posts" class="container-fluid"></div>
 
    
 

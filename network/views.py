@@ -1,9 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib import messages
+from django.core import serializers
+
 
 from .forms import PostForm
 from .models import User, Post, Like, Comment
@@ -18,14 +20,29 @@ def index(request):
             post.save()
             messages.success(request, 'Your post was successfully posted!')
             return redirect('index')  # Redirect to the index page where all posts are displayed
-    
-    elif request.method == "GET":
+    return render(request, "network/index.html")
+
+def load_posts(request):
+    if request.method == "GET":
+        # Get start and end points
+        start = int(request.GET.get("start") or 0)
+        end = int(request.GET.get("end") or (start + 9))
+
         # Query all posts and order them chronologically
-        posts = Post.objects.all().order_by('-created_at')
+        posts = Post.objects.all().order_by('-created_at')[start:end]
+        
         for post in posts:
             post.likes_count = Like.objects.filter(post=post).count()  # Count the number of likes for each post
             post.comments = Comment.objects.filter(post=post)
-        return render(request, 'network/index.html', {'posts': posts})
+            post.username = post.user.username
+        
+        # Serialize posts and comments to JSON and return as JsonResponse
+        data = {
+            'posts': serializers.serialize('json', posts),
+            'comments': [comment.serialize() for comment in Comment.objects.filter(pk__in=[post.pk for post in posts])]
+        }
+
+        return JsonResponse(data, safe=True)
 
 
 def login_view(request):
