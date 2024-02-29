@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block body %}
-<h2>All Posts</h2>
 
     {% if messages %}
         <div class="messages">
@@ -17,7 +16,7 @@
     {% endif %}
 
     {% if user.is_authenticated %}
-    <div class="container-fluid mb-5">
+    <div class="container-fluid mb-5 mt-5">
         <div class="row">
             <div class="col-md-8 offset-md-2">
                 <div class="new-post-form">
@@ -38,7 +37,7 @@
     
     {% endif %}
 
-    <div id="posts" class="container-fluid"></div>
+    <div id="posts" class="container-fluid mt-5"></div>
 
    
 

@@ -1,11 +1,9 @@
-
 // Start with first post
-let counter = 1;
+let counter = 0;
 // Load posts 20 at a time
-const quantity = 20;
+const quantity = 10;
 
 document.addEventListener('DOMContentLoaded', function() {
-
     loadPosts();
     // Use buttons to toggle between views
     document.querySelector('#content').addEventListener('keyup', function() {
@@ -40,15 +38,14 @@ function loadPosts() {
     const end = start + quantity - 1;
     counter = end + 1;
    
-
+    console.log(start);
+    console.log(end);
     // Get new posts and add posts
     fetch(`/posts?start=${start}&end=${end}`)
     .then(response => response.json())
     .then(data => {
         console.log(data);
-        // Access comments directly from data object
-        const posts = JSON.parse(data.posts);
-        const comments = data.comments; // Already an object list
+        const posts = data.posts; // No need to parse JSON, it's already an object
 
         // Append the newly loaded posts to the page
         posts.forEach(post => {
@@ -59,18 +56,18 @@ function loadPosts() {
                     <div class="row">
                         <div class="col-md-8 offset-md-2">
                             <div class="post">
-                                <span style="font-size: 1.25rem; font-weight: bold;" class="username">${post.fields.user}</span> <small>(${post.fields.created_at} ago)</small>
-                                <p class="mt-2">${post.fields.content}</p>
+                                <span style="font-size: 1.25rem; font-weight: bold;" class="username">${post.username}</span> <small>(${post.created_at} ago)</small>
+                                <p class="mt-2">${post.content}</p>
                             </div>
-        
+
                             <div style="display: inline-block;">
-                                <p>&#x2764; ${post.fields.likes_count}</p>
+                                <p>&#x2764; ${post.likes_count}</p>
                             </div>
                             <span style="font-size: 0.85rem; font-weight: bold;">Comments</span>
-                            ${comments[post.pk] && Array.isArray(comments[post.pk]) ? comments[post.pk].map(comment => `
-                                <p>${comment.fields.content}</p>
-                                <p>${comment.fields.created_at} ago</p>
-                            `).join('') : ''}
+                            ${post.comments.map(comment => `
+                                <p>${comment.content}</p>
+                                <p>${comment.created_at} ago</p>
+                            `).join('')}
                             <hr> <!-- Add hr tag here to separate each post -->
                         </div>
                     </div>
@@ -78,12 +75,11 @@ function loadPosts() {
             `;
             document.getElementById('posts').appendChild(postElement);
         });
-        
-        
+       
     })
     .catch(error => {
         console.error('Error loading more posts:', error);
     });
 }
   
-  
+

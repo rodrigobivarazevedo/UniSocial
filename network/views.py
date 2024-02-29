@@ -4,13 +4,37 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib import messages
-from django.core import serializers
+from datetime import datetime, timezone
+import time
+
+from django.db.models import Count
 
 
 from .forms import PostForm
-from .models import User, Post, Like, Comment
+from .models import User, Post
 
+def time_since(time):
+    """
+    Convert a timestamp into a human-readable format like Django's timesince filter.
+    """
+    utc_time = time.astimezone(timezone.utc)  # Convert to UTC
+    now = datetime.now()
+    time_diff = now - utc_time
 
+    if time_diff.days > 7:
+        return time.strftime('%Y-%m-%d %H:%M:%S')
+    elif time_diff.days:
+        return f"{time_diff.days} days ago"
+    elif time_diff.seconds >= 3600:
+        hours = time_diff.seconds // 3600
+        return f"{hours} hours ago"
+    elif time_diff.seconds >= 60:
+        minutes = time_diff.seconds // 60
+        return f"{minutes} minutes ago"
+    else:
+        return "Just now"
+
+    
 def index(request):
     if request.method == 'POST':
         form = PostForm(request.POST)
@@ -19,29 +43,35 @@ def index(request):
             post.user = request.user
             post.save()
             messages.success(request, 'Your post was successfully posted!')
-            return redirect('index')  # Redirect to the index page where all posts are displayed
+        return render(request, 'network/index.html')
     return render(request, "network/index.html")
 
 def load_posts(request):
     if request.method == "GET":
-        # Get start and end points
         start = int(request.GET.get("start") or 0)
         end = int(request.GET.get("end") or (start + 9))
+        print(start)
+        print(end)
+        posts = Post.objects.prefetch_related('comment_set').annotate(
+            likes_count=Count('like')).order_by('-created_at')[start:end]
 
-        # Query all posts and order them chronologically
-        posts = Post.objects.all().order_by('-created_at')[start:end]
-        
+        serialized_posts = []
         for post in posts:
-            post.likes_count = Like.objects.filter(post=post).count()  # Count the number of likes for each post
-            post.comments = Comment.objects.filter(post=post)
-            post.username = post.user.username
-        
-        # Serialize posts and comments to JSON and return as JsonResponse
-        data = {
-            'posts': serializers.serialize('json', posts),
-            'comments': [comment.serialize() for comment in Comment.objects.filter(pk__in=[post.pk for post in posts])]
-        }
+            comments = list(post.comment_set.all().values())
+            serialized_post = {
+                'id': post.id,
+                'content': post.content,
+                'created_at': post.created_at,
+                'username': post.user.username,
+                'likes_count': post.likes_count,
+                'comments': comments,
+            }
+            serialized_posts.append(serialized_post)
 
+        data = {
+            'posts': serialized_posts,
+        }
+        time.sleep(0.5)
         return JsonResponse(data, safe=True)
 
 
