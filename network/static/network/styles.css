@@ -1,0 +1,6 @@
+.username {
+    font-size: 1.25rem; /* Adjust the font size as needed */
+    font-weight: bold; /* Optional: Apply bold font weight */
+    display: inline-block;
+    margin-right: 5px; /* Adjust margin as needed */
+}
