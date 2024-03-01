@@ -4,35 +4,13 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib import messages
-from datetime import datetime, timezone
-import time
-
 from django.db.models import Count
+import json
+from django.contrib.auth.decorators import login_required
 
 
 from .forms import PostForm
-from .models import User, Post
-
-def time_since(time):
-    """
-    Convert a timestamp into a human-readable format like Django's timesince filter.
-    """
-    utc_time = time.astimezone(timezone.utc)  # Convert to UTC
-    now = datetime.now()
-    time_diff = now - utc_time
-
-    if time_diff.days > 7:
-        return time.strftime('%Y-%m-%d %H:%M:%S')
-    elif time_diff.days:
-        return f"{time_diff.days} days ago"
-    elif time_diff.seconds >= 3600:
-        hours = time_diff.seconds // 3600
-        return f"{hours} hours ago"
-    elif time_diff.seconds >= 60:
-        minutes = time_diff.seconds // 60
-        return f"{minutes} minutes ago"
-    else:
-        return "Just now"
+from .models import User, Post, Comment, Like
 
     
 def index(request):
@@ -57,15 +35,13 @@ def load_posts(request):
 
         serialized_posts = []
         for post in posts:
-            comments = list(post.comment_set.all().values())
             serialized_post = {
                 'id': post.id,
                 'content': post.content,
                 'created_at': post.created_at,
                 'username': post.user.username,
                 'likes_count': post.likes_count,
-                'comments_count': post.comments_count,  # Include the count of comments
-                'comments': comments,
+                'comments_count': post.comments_count  
             }
             serialized_posts.append(serialized_post)
 
@@ -73,6 +49,74 @@ def load_posts(request):
             'posts': serialized_posts,
         }
         return JsonResponse(data, safe=True)
+
+@login_required
+def comments(request):
+    
+    data = {}
+    if request.method == "GET":
+        post_id = int(request.GET.get("post_id"))
+        comments = Comment.objects.filter(post=post_id)
+        serialized_comments = []
+        for comment in comments:
+            serialized_comment = {
+                'id': comment.id,
+                'user': comment.user.username,
+                'content': comment.content,  # Include other comment attributes if needed
+            }
+            serialized_comments.append(serialized_comment)
+
+        data['comments'] = serialized_comments  # Add serialized comments to the response
+
+    elif request.method == "POST":
+        # Handle the case where posting a comment
+        data = json.loads(request.body)
+        post_id = data.get('post_id')
+        content = data.get('comment_content')
+        if post_id and content:
+            post = Post.objects.get(pk=post_id)
+            comment = Comment.objects.create(user=request.user, post=post, content=content)
+            serialized_comment = {
+                'id': comment.id,
+                'user': comment.user.username,
+                'content': comment.content,
+            }
+            data['comment'] = serialized_comment
+            return JsonResponse(data, status=201)  # Return the newly created comment
+        else:
+            return JsonResponse({'error': 'Invalid request: No post_id or comment_content provided'}, status=400)
+
+            
+
+    return JsonResponse(data, safe=True)
+
+@login_required
+# This view is CSRF protected by default
+def likes(request):
+    if request.method == 'POST':
+        # Parse JSON request body
+        try:
+            data = json.loads(request.body)
+            post_id = data.get('post_id')
+            if post_id:
+                post = Post.objects.get(pk=post_id)
+                like, created = Like.objects.get_or_create(user=request.user, post=post)
+                if created:
+                    # Increment like count
+                    likes_count = Like.objects.filter(post=post).count()
+                    return JsonResponse({'message': 'Like added successfully', 'likes_count': likes_count}, status=201)
+                else:
+                    # Like already exists
+                    return JsonResponse({'message': 'Like already exists'}, status=200)
+            else:
+                return JsonResponse({'error': 'Invalid request: No post_id provided'}, status=400)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format in request body'}, status=400)
+    
+    elif request.method == 'GET':
+        # Handle GET requests if needed
+        pass
+
 
 def login_view(request):
     if request.method == "POST":

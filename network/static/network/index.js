@@ -45,7 +45,7 @@ function loadPosts() {
 
         // Append the newly loaded posts to the page
         posts.forEach(post => {
-            console.log(post.id);
+            const commentFormId = `addCommentForm_${post.id}`;
             // Create HTML elements for each post and append them to the container
             const postElement = document.createElement('div');
             postElement.innerHTML = `
@@ -58,12 +58,25 @@ function loadPosts() {
                             </div>
 
                             <div style="display: inline-block;">
-                                <p><a href="#" class="likeEmoji" data-postId="${post.id}">&#x2764;</a> ${post.likes_count}</p>
+                                <p><a href="#" class="likeEmoji" id="likes_${post.id}">&#x2764;</a> <span id="likesCount_${post.id}">${post.likes_count}</span></p>
                             </div>
 
+
                             <div style="display: inline-block;">
-                                <p><a href="#" class="commentEmoji" data-postId="${post.id}">&#x1F4AC;</a> ${post.comments_count}</p>
+                                <p><a href="#" class="commentEmoji" id="comments_${post.id}">&#x1F4AC;</a> ${post.comments_count}</p>
                             </div>
+
+
+                            <div id="commentsContainer_${post.id}">
+                                <!-- Comments will be dynamically added here -->
+                            </div>
+
+                            <!-- Form to add a comment -->
+                            <form id="${commentFormId}" style="display: none; padding: 10px; border-radius: 5px; width: 50%;">
+                                <textarea id="commentContent" name="commentContent" rows="3" style="width: 100%; margin-bottom: 10px; padding: 5px;" placeholder="Write a comment"></textarea>
+                                <button type="submit" style="background-color: #4CAF50; color: white; padding: 5px 15px; border: none; border-radius: 2px; cursor: pointer;">Post Comment</button>
+                            </form>
+
                             <hr> <!-- Add hr tag here to separate each post -->
                         </div>
                     </div>
@@ -72,17 +85,27 @@ function loadPosts() {
 
             postElement.querySelector('.likeEmoji').addEventListener('click', function(event) {
                 // Perform AJAX request to like the post with postId
-                // Update the like count on the UI
-                alert('Add like for post with ID: ' + post.id);
-                const likeCountElement = document.getElementById(`likes_${post.id}`);
-                likeCountElement.textContent = parseInt(likeCountElement.textContent) + 1;
+                event.preventDefault();
+                add_like(post.id);
               })
 
             postElement.querySelector('.commentEmoji').addEventListener('click', function(event) {
                 // Perform AJAX request or any action related to commenting
-                // For demonstration, let's show an alert
-                alert('Add comment for post with ID: ' + post.id);
+                event.preventDefault();
+                const commentForm = document.getElementById(commentFormId);
+                commentForm.style.display = commentForm.style.display === 'none' ? 'block' : 'none';
+                load_comments(post.id);
             })
+
+            // Attach event listener for the form submission
+            postElement.querySelector(`#${commentFormId}`).addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                // Get the comment content from the textarea
+                const commentContent = document.getElementById(`commentContent_${post.id}`).value;
+                post_comment(post.id, commentContent);
+
+            })  
             document.getElementById('posts').appendChild(postElement);
             
         });
@@ -93,3 +116,107 @@ function loadPosts() {
     });
 }
 
+function add_like(post_id) {
+    fetch('/posts/likes', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')  // Make sure to include CSRF token
+        },
+        body: JSON.stringify({ post_id: post_id })
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json(); // Parse response as JSON
+        } else {
+            // Do nothing silently if there's an error
+            console.error('Failed to add like');
+            return null; // Return null to prevent any further processing
+        }
+    })
+    .then(data => {
+        // Handle the response data here
+        if (data.likes_count) {
+            // If the response is not null, update the UI with the like count
+            updateLikeCount(post_id, data.likes_count);
+        }
+    })
+    .catch(error => console.error('Error:', error)); // Log any unexpected errors to the console
+}
+
+
+function updateLikeCount(post_id, likes_count) {
+    // Update the like count in the UI
+    const likesCountElement = document.getElementById(`likesCount_${post_id}`);
+    if (likesCountElement) {
+        likesCountElement.textContent = likes_count;
+    }
+}
+
+
+
+
+// Function to get CSRF token from cookies
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
+// Function to load comments
+function load_comments(post_id){
+    fetch(`/posts/comments?post_id=${post_id}`)
+    .then(response => response.json())
+    .then(data => {
+        // Handle the received comments data here
+        const commentsContainer = document.getElementById('commentsContainer');
+        commentsContainer.innerHTML = '';
+
+        data.comments.forEach(comment => {
+            const commentElement = document.createElement('div');
+            commentElement.innerHTML = `
+            <div class="comment mt-2">
+                <span style="font-size: 0.75rem; font-weight: bold;" class="username">${comment.user}</span> <small>(${comment.created_at} ago)</small>
+                <p class="mt-2">${comment.content}</p>
+            </div>
+            `;
+            commentsContainer.appendChild(commentElement);
+        });
+    });
+}
+
+
+
+function post_comment(post_id, comment_content) {
+    // Perform AJAX request to submit the comment
+    fetch('/posts/comments', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            post_id: post_id,
+            comment_content: comment_content
+        })
+    })
+    .then(response => {
+        if (response.ok) {
+            // If the comment was added successfully, reload the comments for the post
+            load_comments(post_id); // Use post_id instead of post.id
+        } else {
+            console.error('Failed to add comment');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}

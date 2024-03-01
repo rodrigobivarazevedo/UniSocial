@@ -12,5 +12,6 @@ urlpatterns = [
 
     # API routes
     path('posts/', views.load_posts, name='load_posts'),
-
+    path('posts/comments', views.comments, name='comments'),
+    path('posts/likes', views.likes, name='likes'),
 ]
