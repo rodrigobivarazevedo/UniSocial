@@ -37,18 +37,15 @@ function loadPosts() {
     const start = counter;
     const end = start + quantity - 1;
     counter = end + 1;
-   
-    console.log(start);
-    console.log(end);
     // Get new posts and add posts
     fetch(`/posts?start=${start}&end=${end}`)
     .then(response => response.json())
     .then(data => {
-        console.log(data);
         const posts = data.posts; // No need to parse JSON, it's already an object
 
         // Append the newly loaded posts to the page
         posts.forEach(post => {
+            console.log(post.id);
             // Create HTML elements for each post and append them to the container
             const postElement = document.createElement('div');
             postElement.innerHTML = `
@@ -61,25 +58,38 @@ function loadPosts() {
                             </div>
 
                             <div style="display: inline-block;">
-                                <p>&#x2764; ${post.likes_count}</p>
+                                <p><a href="#" class="likeEmoji" data-postId="${post.id}">&#x2764;</a> ${post.likes_count}</p>
                             </div>
-                            <span style="font-size: 0.85rem; font-weight: bold;">Comments</span>
-                            ${post.comments.map(comment => `
-                                <p>${comment.content}</p>
-                                <p>${comment.created_at} ago</p>
-                            `).join('')}
+
+                            <div style="display: inline-block;">
+                                <p><a href="#" class="commentEmoji" data-postId="${post.id}">&#x1F4AC;</a> ${post.comments_count}</p>
+                            </div>
                             <hr> <!-- Add hr tag here to separate each post -->
                         </div>
                     </div>
                 </div>
             `;
+
+            postElement.querySelector('.likeEmoji').addEventListener('click', function(event) {
+                // Perform AJAX request to like the post with postId
+                // Update the like count on the UI
+                alert('Add like for post with ID: ' + post.id);
+                const likeCountElement = document.getElementById(`likes_${post.id}`);
+                likeCountElement.textContent = parseInt(likeCountElement.textContent) + 1;
+              })
+
+            postElement.querySelector('.commentEmoji').addEventListener('click', function(event) {
+                // Perform AJAX request or any action related to commenting
+                // For demonstration, let's show an alert
+                alert('Add comment for post with ID: ' + post.id);
+            })
             document.getElementById('posts').appendChild(postElement);
+            
         });
-       
+
     })
     .catch(error => {
         console.error('Error loading more posts:', error);
     });
 }
-  
 

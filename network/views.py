@@ -50,10 +50,10 @@ def load_posts(request):
     if request.method == "GET":
         start = int(request.GET.get("start") or 0)
         end = int(request.GET.get("end") or (start + 9))
-        print(start)
-        print(end)
+        
         posts = Post.objects.prefetch_related('comment_set').annotate(
-            likes_count=Count('like')).order_by('-created_at')[start:end]
+            likes_count=Count('like'),
+            comments_count=Count('comment')).order_by('-created_at')[start:end]
 
         serialized_posts = []
         for post in posts:
@@ -64,6 +64,7 @@ def load_posts(request):
                 'created_at': post.created_at,
                 'username': post.user.username,
                 'likes_count': post.likes_count,
+                'comments_count': post.comments_count,  # Include the count of comments
                 'comments': comments,
             }
             serialized_posts.append(serialized_post)
@@ -71,9 +72,7 @@ def load_posts(request):
         data = {
             'posts': serialized_posts,
         }
-        time.sleep(0.5)
         return JsonResponse(data, safe=True)
-
 
 def login_view(request):
     if request.method == "POST":
