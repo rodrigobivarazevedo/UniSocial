@@ -29,19 +29,22 @@ def load_posts(request):
         start = int(request.GET.get("start") or 0)
         end = int(request.GET.get("end") or (start + 9))
         
+        # Annotate the likes count and prefetch related comments for each post
         posts = Post.objects.prefetch_related('comment_set').annotate(
-            likes_count=Count('like'),
-            comments_count=Count('comment')).order_by('-created_at')[start:end]
+            likes_count=Count('like')).order_by('-created_at')[start:end]
 
         serialized_posts = []
         for post in posts:
+            # Fetch the precalculated likes count
+            likes_count = getattr(post, 'likes_count', 0)
+
             serialized_post = {
                 'id': post.id,
                 'content': post.content,
                 'created_at': post.created_at,
                 'username': post.user.username,
-                'likes_count': post.likes_count,
-                'comments_count': post.comments_count  
+                'likes_count': likes_count,  # Use precalculated likes count
+                'comments_count': post.comment_set.count()  # Recalculate comments count
             }
             serialized_posts.append(serialized_post)
 
@@ -49,6 +52,9 @@ def load_posts(request):
             'posts': serialized_posts,
         }
         return JsonResponse(data, safe=True)
+    
+
+
 
 @login_required
 def comments(request):
@@ -62,11 +68,14 @@ def comments(request):
             serialized_comment = {
                 'id': comment.id,
                 'user': comment.user.username,
-                'content': comment.content,  # Include other comment attributes if needed
+                'content': comment.content, 
+                'time': comment.created_at,
             }
             serialized_comments.append(serialized_comment)
 
         data['comments'] = serialized_comments  # Add serialized comments to the response
+
+        return JsonResponse(data, safe=True)
 
     elif request.method == "POST":
         # Handle the case where posting a comment
@@ -76,20 +85,14 @@ def comments(request):
         if post_id and content:
             post = Post.objects.get(pk=post_id)
             comment = Comment.objects.create(user=request.user, post=post, content=content)
-            serialized_comment = {
-                'id': comment.id,
-                'user': comment.user.username,
-                'content': comment.content,
-            }
-            data['comment'] = serialized_comment
-            return JsonResponse(data, status=201)  # Return the newly created comment
+            # Increment like count
+            comments_count = Comment.objects.filter(post=post).count()
+            return JsonResponse({'message': 'comment added successfully', 'comments_count': comments_count}, status=201)
+        
         else:
             return JsonResponse({'error': 'Invalid request: No post_id or comment_content provided'}, status=400)
-
-            
-
-    return JsonResponse(data, safe=True)
-
+        
+   
 @login_required
 # This view is CSRF protected by default
 def likes(request):

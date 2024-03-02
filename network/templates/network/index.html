@@ -3,43 +3,57 @@
 
 {% block body %}
 
-    {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-                {% if message.tags %}
-                    <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'warning' %}alert-warning{% else %}alert-success{% endif %}" role="alert">
-                        {{ message }}
-                    </div>
-                {% endif %}
-            {% endfor %}
-        </div>
-    {% endif %}
 
     {% if user.is_authenticated %}
-    <div class="container-fluid mb-5 mt-5">
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <div class="new-post-form">
-                    <h3>New Post</h3>
-                    <form method="post" action="{% url 'index' %}">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <textarea class="form-control" id="content" name="content" rows="4" maxlength="280" required></textarea>
-                            <small class="form-text text-muted" id="characterCount">280 characters remaining</small>
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    {% if message.tags %}
+                        <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'warning' %}alert-warning{% else %}alert-success{% endif %}" role="alert">
+                            {{ message }}
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    
+        <div class="container-fluid mb-5 mt-5">
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <div class="new-post-form">
+                        <h3>New Post</h3>
+                        <form method="post" action="{% url 'index' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <textarea class="form-control" id="content" name="content" rows="4" maxlength="280" required></textarea>
+                                <small class="form-text text-muted" id="characterCount">280 characters remaining</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+        
+        <div id="posts" class="container-fluid mt-5"></div>
     
-    
+        {% else %}
+        
+        <div class="container">
+            <header>
+                <h1 class="mt-5">About Us</h1>
+            </header>
+            <section>
+                <p>Welcome to our website! We are dedicated to providing you with the best experience possible.</p>
+                <p>Our mission is to...</p>
+                <p>Feel free to reach out to us at <a href="mailto:info@example.com">info@example.com</a> for any inquiries or feedback.</p>
+            </section>
+        </div>
+        
     {% endif %}
 
-    <div id="posts" class="container-fluid mt-5"></div>
-
-   
 
 {% endblock %}
 
