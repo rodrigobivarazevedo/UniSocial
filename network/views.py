@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib import messages
 from django.db.models import Count
@@ -9,8 +9,10 @@ import json
 from django.contrib.auth.decorators import login_required
 
 
+
+
 from .forms import PostForm
-from .models import User, Post, Comment, Like
+from .models import User, Post, Comment, Like, UserProfile
 
     
 def index(request):
@@ -120,6 +122,60 @@ def likes(request):
         # Handle GET requests if needed
         pass
 
+@login_required
+def profile(request, username):
+    # Get the user profile based on the username
+    user = get_object_or_404(User, username=username)
+    user_profile = get_object_or_404(UserProfile, user=user)
+
+    # Fetch all posts by the user
+    posts = Post.objects.filter(user=user).order_by('-created_at')
+
+    for post in posts:
+            post.likes_count = Like.objects.filter(post=post).count()  # Count the number of likes for each post
+            post.comments = Comment.objects.filter(post=post)
+      
+
+    is_following = False
+    can_follow = False
+
+    if request.user.is_authenticated:
+        # Check if the user is visiting their own profile
+        if request.user == user:
+            can_follow = False  # Prevent user from following themselves
+        else:
+            can_follow = True
+            # Determine if the current user is following this profile user
+            is_following = request.user in user_profile.followers.all()
+
+    context = {
+        'user_profile': user_profile,
+        'user_posts': posts,
+        'is_following': is_following,
+        'can_follow': can_follow,
+    }
+    return render(request, 'network/profile.html', context)
+
+@login_required
+def follow(request, username):
+    # Get the user profile to follow
+    user_to_follow = get_object_or_404(UserProfile, user__username=username)
+
+    # Add the current user to the followers of the user_to_follow
+    user_to_follow.followers.add(request.user)
+
+    return redirect('profile', username=username)
+
+@login_required
+def unfollow(request, username):
+    # Get the user profile to unfollow
+    user_to_unfollow = get_object_or_404(UserProfile, user__username=username)
+
+    # Remove the current user from the followers of the user_to_unfollow
+    user_to_unfollow.followers.remove(request.user)
+
+    return redirect('profile', username=username)
+
 
 def login_view(request):
     if request.method == "POST":
@@ -162,13 +218,14 @@ def register(request):
         # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
-            user.save()
+            # Create the user profile
+            user_profile = UserProfile.objects.create(user=user)
+            login(request, user)
+            return redirect("index")
         except IntegrityError:
             return render(request, "network/register.html", {
                 "message": "Username already taken."
             })
-        login(request, user)
-        return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
 

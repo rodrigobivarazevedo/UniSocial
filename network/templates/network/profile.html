@@ -1,0 +1,57 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+    {% if user_profile %}
+        <div class="container-fluid mb-5">
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <h1>{{ user_profile.user.username }}</h1>
+                    <p>Followers: {{ user_profile.followers.count }}</p>
+                    <p>Following: {{ user_profile.following.count }}</p>
+                    {% if can_follow %}
+                            {% if is_following %}
+                                <form method="post" action="{% url 'unfollow' username=user_profile.user.username %}">
+                                    {% csrf_token %}
+                                    <button type="submit">Unfollow</button>
+                                </form>
+                            {% else %}
+                                <form method="post" action="{% url 'follow' username=user_profile.user.username %}">
+                                    {% csrf_token %}
+                                    <button type="submit">Follow</button>
+                                </form>
+                            {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        
+        {% for post in user_posts %}
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+                        <div class="post">
+                            <span style="font-size: 1.25rem; font-weight: bold;" class="username">{{ post.user.username }}</span> <small>({{ post.created_at|timesince }} ago)</small>
+                            <p class="mt-2">{{ post.content }}</p>
+                        </div>
+
+                        <div style="display: inline-block;">
+                            <p>&#x2764; {{ post.likes_count }}</p>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: bold;">Comments</span>
+                        {% for comment in post.comments %}
+                            <p>{{ comment.content }}</p>
+                            <p>{{ comment.created_at|timesince }} ago</p>
+                        {% endfor %}
+                        <hr> <!-- Add hr tag here to separate each post -->
+                        
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+       
+    {% else %}
+        <p>No user profile found.</p>
+    {% endif %}
+{% endblock %}
