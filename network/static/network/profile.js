@@ -4,13 +4,8 @@ let counter = 0;
 const quantity = 10;
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadPosts();
-    // Use buttons to toggle between views
-    document.querySelector('#content').addEventListener('keyup', function() {
-        var remainingChars = 280 - this.value.length;
-        document.querySelector('#characterCount').textContent = remainingChars + ' characters remaining';
-    });
-
+    loadPosts(userProfileUsername);
+    
     setTimeout(function() {
         document.querySelectorAll('.alert').forEach(function(alert) {
             alert.remove();
@@ -23,19 +18,19 @@ document.addEventListener('DOMContentLoaded', function() {
 window.onscroll = () => {
     // Check if we're at the bottom
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-        loadPosts();
+        loadPosts(userProfileUsername);
     } 
 };
  
   
 // Load next set of posts
-function loadPosts() {
+function loadPosts(userProfileUsername) {
     // Set start and end post numbers, and update counter
     const start = counter;
     const end = start + quantity - 1;
     counter = end + 1;
     // Get new posts and add posts
-    fetch(`/posts?start=${start}&end=${end}`)
+    fetch(`/posts?start=${start}&end=${end}&user=${userProfileUsername}`)
     .then(response => response.json())
     .then(data => {
         const posts = data.posts; // No need to parse JSON, it's already an object

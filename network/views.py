@@ -27,12 +27,44 @@ def index(request):
     return render(request, "network/index.html")
 
 def load_posts(request):
-    if request.method == "GET":
+
+    if request.method == "GET" and request.GET.get("user") == "all":
         start = int(request.GET.get("start") or 0)
         end = int(request.GET.get("end") or (start + 9))
         
         # Annotate the likes count and prefetch related comments for each post
         posts = Post.objects.prefetch_related('comment_set').annotate(
+            likes_count=Count('like')).order_by('-created_at')[start:end]
+
+        serialized_posts = []
+        for post in posts:
+            # Fetch the precalculated likes count
+            likes_count = getattr(post, 'likes_count', 0)
+
+            serialized_post = {
+                'id': post.id,
+                'content': post.content,
+                'created_at': post.created_at,
+                'username': post.user.username,
+                'likes_count': likes_count,  # Use precalculated likes count
+                'comments_count': post.comment_set.count()  # Recalculate comments count
+            }
+            serialized_posts.append(serialized_post)
+
+        data = {
+            'posts': serialized_posts,
+        }
+        return JsonResponse(data, safe=True)
+    
+    elif request.method == "GET" and request.GET.get("user") != "all":
+        start = int(request.GET.get("start") or 0)
+        end = int(request.GET.get("end") or (start + 9))
+
+        username = request.GET.get("user")
+        user = get_object_or_404(User, username=username)  # Fetch the User object
+
+        # Annotate the likes count and prefetch related comments for each post
+        posts = Post.objects.filter(user=user).prefetch_related('comment_set').annotate(
             likes_count=Count('like')).order_by('-created_at')[start:end]
 
         serialized_posts = []
@@ -128,14 +160,6 @@ def profile(request, username):
     user = get_object_or_404(User, username=username)
     user_profile = get_object_or_404(UserProfile, user=user)
 
-    # Fetch all posts by the user
-    posts = Post.objects.filter(user=user).order_by('-created_at')
-
-    for post in posts:
-            post.likes_count = Like.objects.filter(post=post).count()  # Count the number of likes for each post
-            post.comments = Comment.objects.filter(post=post)
-      
-
     is_following = False
     can_follow = False
 
@@ -150,11 +174,13 @@ def profile(request, username):
 
     context = {
         'user_profile': user_profile,
-        'user_posts': posts,
         'is_following': is_following,
         'can_follow': can_follow,
     }
     return render(request, 'network/profile.html', context)
+
+
+
 
 @login_required
 def follow(request, username):

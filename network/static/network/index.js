@@ -5,7 +5,7 @@ const quantity = 10;
 
 document.addEventListener('DOMContentLoaded', function() {
     loadPosts();
-    // Use buttons to toggle between views
+   
     document.querySelector('#content').addEventListener('keyup', function() {
         var remainingChars = 280 - this.value.length;
         document.querySelector('#characterCount').textContent = remainingChars + ' characters remaining';
@@ -35,7 +35,7 @@ function loadPosts() {
     const end = start + quantity - 1;
     counter = end + 1;
     // Get new posts and add posts
-    fetch(`/posts?start=${start}&end=${end}`)
+    fetch(`/posts?start=${start}&end=${end}&user=all`)
     .then(response => response.json())
     .then(data => {
         const posts = data.posts; // No need to parse JSON, it's already an object
@@ -49,7 +49,7 @@ function loadPosts() {
                     <div class="row">
                         <div class="col-md-8 offset-md-2">
                             <div class="post">
-                                <span style="font-size: 1.25rem; font-weight: bold;" class="username">${post.username}</span> <small>(${post.created_at} ago)</small>
+                                <span style="font-size: 1.25rem; font-weight: bold;" class="username"><a href="/profile/${post.username}/">${post.username}</a></span> <small>(${post.created_at} ago)</small>
                                 <p class="mt-2">${post.content}</p>
                             </div>
 
