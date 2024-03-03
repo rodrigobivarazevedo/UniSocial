@@ -12,7 +12,7 @@ from .models import Email
 from network.models import User
 
 
-def inbox(request):
+def mail(request):
     # Authenticated users view their inbox
     if request.user.is_authenticated:
         return render(request, "mail/inbox.html")

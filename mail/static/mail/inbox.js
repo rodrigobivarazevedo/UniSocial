@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const body = document.querySelector('#compose-body').value;
   
         // Send email data to server
-        fetch('/emails', {
+        fetch('/mail/emails', {
             method: 'POST',
             body: JSON.stringify({
                 recipients: recipients,
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('#emails-view').style.display = 'block';
   
     // Fetch emails
-    fetch(`/emails/${mailbox}`)
+    fetch(`/mail/emails/${mailbox}`)
       .then(response => response.json())
       .then(emails => {
         // Clear previous emails
@@ -191,10 +191,12 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   }
   
+
+
   function display_email(mailbox, emailId) {
     history.pushState({mailbox: mailbox, emailId: emailId}, '', "");
     
-    fetch(`/emails/${emailId}`)
+    fetch(`/mail/emails/${emailId}`)
       .then(response => response.json())
       .then(clickedEmail => {
         // Clear emails view
@@ -205,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
         clickedEmailElement.classList.add('email');
   
         // Update read status of the email
-        fetch(`/emails/${emailId}`, {
+        fetch(`/mail/emails/${emailId}`, {
           method: 'PUT',
           body: JSON.stringify({
               read: true
@@ -243,10 +245,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('#emails-view').appendChild(clickedEmailElement);
       });
   }
+
+
   
   function archiveEmail(emailId, newArchiveState, targetmailbox) {
     // Send PUT request to archive email
-    fetch(`/emails/${emailId}`, {
+    fetch(`/mail/emails/${emailId}`, {
       method: 'PUT',
       body: JSON.stringify({
         archived: newArchiveState
