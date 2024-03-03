@@ -154,12 +154,13 @@ def likes(request):
         # Handle GET requests if needed
         pass
 
+
 @login_required
 def profile(request, username):
     # Get the user profile based on the username
     user = get_object_or_404(User, username=username)
     user_profile = get_object_or_404(UserProfile, user=user)
-
+    
     is_following = False
     can_follow = False
 
@@ -180,27 +181,38 @@ def profile(request, username):
     return render(request, 'network/profile.html', context)
 
 
-
-
 @login_required
 def follow(request, username):
-    # Get the user profile to follow
-    user_to_follow = get_object_or_404(UserProfile, user__username=username)
+    # Get the user to follow
+    user_to_follow = get_object_or_404(User, username=username)
+    # Get the current user's UserProfile instance
+    user_profile = get_object_or_404(UserProfile, user=request.user)
 
     # Add the current user to the followers of the user_to_follow
-    user_to_follow.followers.add(request.user)
+    user_to_follow_profile = UserProfile.objects.get(user=user_to_follow)
+    user_to_follow_profile.followers.add(request.user)
+    
+    # Add the user_to_follow to the current user's following list
+    user_profile.following.add(user_to_follow)
 
     return redirect('profile', username=username)
 
 @login_required
 def unfollow(request, username):
-    # Get the user profile to unfollow
-    user_to_unfollow = get_object_or_404(UserProfile, user__username=username)
+    # Get the user to unfollow
+    user_to_unfollow = get_object_or_404(User, username=username)
+    # Get the current user's UserProfile instance
+    user_profile = get_object_or_404(UserProfile, user=request.user)
 
     # Remove the current user from the followers of the user_to_unfollow
-    user_to_unfollow.followers.remove(request.user)
+    user_to_unfollow_profile = UserProfile.objects.get(user=user_to_unfollow)
+    user_to_unfollow_profile.followers.remove(request.user)
+    
+    # Remove the user_to_unfollow from the current user's following list
+    user_profile.following.remove(user_to_unfollow)
 
     return redirect('profile', username=username)
+
 
 
 def login_view(request):

@@ -16,9 +16,10 @@ class Like(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    followers = models.ManyToManyField(User, related_name='following')
-
-
+    followers = models.ManyToManyField(User, related_name='followers')
+    following = models.ManyToManyField(User, related_name='following')
+    
+   
 class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
