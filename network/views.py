@@ -275,9 +275,8 @@ def login_view(request):
             login(request, user)
             return HttpResponseRedirect(reverse("index"))
         else:
-            return render(request, "network/login.html", {
-                "message": "Invalid username and/or password."
-            })
+            messages.error(request, 'Invalid username and/or password.')
+            return render(request, "network/login.html")
     else:
         return render(request, "network/login.html")
 
@@ -296,9 +295,8 @@ def register(request):
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
         if password != confirmation:
-            return render(request, "network/register.html", {
-                "message": "Passwords must match."
-            })
+            messages.error(request, 'Passwords must match.')
+            return render(request, "network/register.html")
 
         # Attempt to create new user
         try:
@@ -306,11 +304,11 @@ def register(request):
             # Create the user profile
             user_profile = UserProfile.objects.create(user=user)
             login(request, user)
+            messages.success(request, 'Account created')
             return redirect("index")
         except IntegrityError:
-            return render(request, "network/register.html", {
-                "message": "Username already taken."
-            })
+            messages.error(request, 'Username already taken.')
+            return render(request, "network/register.html")
     else:
         return render(request, "network/register.html")
 
