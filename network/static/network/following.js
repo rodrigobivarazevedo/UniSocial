@@ -5,12 +5,7 @@ const quantity = 10;
 
 document.addEventListener('DOMContentLoaded', function() {
     loadPosts();
-   
-    document.querySelector('#content').addEventListener('keyup', function() {
-        var remainingChars = 280 - this.value.length;
-        document.querySelector('#characterCount').textContent = remainingChars + ' characters remaining';
-    });
-
+    
     setTimeout(function() {
         document.querySelectorAll('.alert').forEach(function(alert) {
             alert.remove();
@@ -33,9 +28,8 @@ function loadPosts() {
     // Set start and end post numbers, and update counter
     const start = counter;
     const end = start + quantity - 1;
-
     // Get new posts and add posts
-    fetch(`/posts?start=${start}&end=${end}&user=all`)
+    fetch(`/posts?start=${start}&end=${end}&user=following`)
     .then(response => response.json())
     .then(data => {
         const posts = data.posts; // No need to parse JSON, it's already an object
@@ -44,7 +38,6 @@ function loadPosts() {
         if (posts.length === 0) {
             return;
         }
-
 
         // Append the newly loaded posts to the page
         posts.forEach(post => {
@@ -55,7 +48,7 @@ function loadPosts() {
                     <div class="row">
                         <div class="col-md-8 offset-md-2">
                             <div class="post">
-                                <span style="font-size: 1.25rem; font-weight: bold;" class="username"><a href="/profile/${post.username}/">${post.username}</a></span> <small>(${post.created_at} ago)</small>
+                                <span style="font-size: 1.25rem; font-weight: bold;" class="username">${post.username}</span> <small>(${post.created_at} ago)</small>
                                 <p class="mt-2">${post.content}</p>
                             </div>
 
@@ -110,7 +103,6 @@ function loadPosts() {
             })  
             document.getElementById('posts').appendChild(postElement); 
         });
-
         // Update the counter only if new posts are loaded
         counter = end + 1;
     })

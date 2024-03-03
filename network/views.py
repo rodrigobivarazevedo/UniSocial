@@ -26,8 +26,9 @@ def index(request):
         return render(request, 'network/index.html')
     return render(request, "network/index.html")
 
-def load_posts(request):
 
+@login_required
+def load_posts(request):
     if request.method == "GET" and request.GET.get("user") == "all":
         start = int(request.GET.get("start") or 0)
         end = int(request.GET.get("end") or (start + 9))
@@ -56,7 +57,42 @@ def load_posts(request):
         }
         return JsonResponse(data, safe=True)
     
-    elif request.method == "GET" and request.GET.get("user") != "all":
+    elif request.method == "GET" and request.GET.get("user") == "following":
+        start = int(request.GET.get("start") or 0)
+        end = int(request.GET.get("end") or (start + 9))
+
+        # Get the current user
+        user_profile = get_object_or_404(UserProfile, user=request.user)
+    
+        # Get the users that the current user is following
+        following_users = user_profile.following.all()
+    
+        # Annotate the likes count and prefetch related comments for the posts of the following users
+        posts = Post.objects.filter(user__in=following_users).prefetch_related('comment_set').annotate(
+            likes_count=Count('like')).order_by('-created_at')[start:end]
+
+        serialized_posts = []
+        for post in posts:
+            # Fetch the precalculated likes count
+            likes_count = getattr(post, 'likes_count', 0)
+
+            serialized_post = {
+                'id': post.id,
+                'content': post.content,
+                'created_at': post.created_at,
+                'username': post.user.username,
+                'likes_count': likes_count,  # Use precalculated likes count
+                'comments_count': post.comment_set.count()  # Recalculate comments count
+            }
+            serialized_posts.append(serialized_post)
+
+        data = {
+            'posts': serialized_posts,
+        }
+        return JsonResponse(data, safe=True)
+    
+    
+    elif request.method == "GET" and request.GET.get("user") != "all" and request.GET.get("user") != "following":
         start = int(request.GET.get("start") or 0)
         end = int(request.GET.get("end") or (start + 9))
 
@@ -179,6 +215,17 @@ def profile(request, username):
         'can_follow': can_follow,
     }
     return render(request, 'network/profile.html', context)
+
+@login_required
+def following(request, username):
+     # Get the user profile based on the username
+    user = get_object_or_404(User, username=username)
+    user_profile = get_object_or_404(UserProfile, user=user)
+    
+    context = {
+        'user_profile': user_profile,
+    }
+    return render(request, 'network/following.html', context)
 
 
 @login_required

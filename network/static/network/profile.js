@@ -28,12 +28,17 @@ function loadPosts(userProfileUsername) {
     // Set start and end post numbers, and update counter
     const start = counter;
     const end = start + quantity - 1;
-    counter = end + 1;
+  
     // Get new posts and add posts
     fetch(`/posts?start=${start}&end=${end}&user=${userProfileUsername}`)
     .then(response => response.json())
     .then(data => {
         const posts = data.posts; // No need to parse JSON, it's already an object
+
+        // If no new posts are loaded, don't increase the counter
+        if (posts.length === 0) {
+            return;
+        }
 
         // Append the newly loaded posts to the page
         posts.forEach(post => {
@@ -99,10 +104,13 @@ function loadPosts(userProfileUsername) {
             })  
             document.getElementById('posts').appendChild(postElement); 
         });
+        // Update the counter only if new posts are loaded
+        counter = end + 1;
     })
     .catch(error => {
         console.error('Error loading more posts:', error);
     });
+
 }
 
 function add_like(post_id) {
