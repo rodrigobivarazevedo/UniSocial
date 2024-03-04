@@ -1,0 +1,25 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <h2>Active Listings</h2>
+    <ul>
+        {% for listing in active_listings %}
+            <li>
+                <a href="{% url 'listing_detail' listing_id=listing.id %}">
+                    {{ listing.title }}
+                    <!-- Display the image if it exists -->
+                    {% if listing.image %}
+                        <img src="{{ listing.image.url }}" alt="{{ listing.title }}" style="max-width: 200px; max-height: 200px;">
+                    {% else %}
+                        <!-- Display a placeholder image if no image is uploaded -->
+                        <img src="{% static 'auctions/placeholder.jpg' %}" alt="Placeholder" style="max-width: 200px; max-height: 200px;">
+                    {% endif %}
+                </a>
+            </li>
+            <li>{{ listing.current_price }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
+

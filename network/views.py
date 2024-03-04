@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 
 
 from .forms import PostForm
-from .models import User, Post, Comment, Like, UserProfile
+from .models import Post, Comment, Like, UserProfile, User
 
     
 def index(request):

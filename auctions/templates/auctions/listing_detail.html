@@ -1,0 +1,96 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block body %}
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            {% if message.tags %}
+                <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'warning' %}alert-warning{% else %}alert-success{% endif %}" role="alert">
+                    {{ message }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+
+    <h1>{{ listing.title }}</h1>
+
+    {% if listing.image %}
+        <img src="{{ listing.image.url }}" alt="{{ listing.title }}" style="max-width: 300px; max-height: 300px;">
+    {% else %}
+        <!-- Display a placeholder image if no image is uploaded -->
+        <img src="{% static 'auctions/placeholder.jpg' %}" alt="Placeholder" style="max-width: 300px; max-height: 300px;">
+    {% endif %}
+
+    <p><strong>Status:</strong> {{ listing.status }}</p>
+    <!-- Display other listing details -->
+    <p><strong>Description:</strong> {{ listing.description }}</p>
+    <p><strong>Starting Bid:</strong> {{ listing.starting_bid }}</p>
+    <p><strong>Current Price:</strong> {{ listing.current_price }}</p>
+    <p><strong>Start Time:</strong> {{ listing.start_time }}</p>
+    <p><strong>End Time:</strong> {{ listing.end_time }}</p>
+    <p><strong>Seller:</strong> {{ listing.seller.username }}</p>
+    <p><strong>Category:</strong> {{ listing.category }}</p>
+
+    <!-- Watchlist functionality -->
+    {% if user.is_authenticated %}
+        {% if listing in user.watchlist.all %}
+            <form action="{% url 'remove_from_watchlist' listing.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit">Remove from Watchlist</button>
+            </form>
+        {% else %}
+            <form action="{% url 'add_to_watchlist' listing.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit">Add to Watchlist</button>
+            </form>
+        {% endif %}
+    {% endif %}
+
+    <!-- Display Bids -->
+    <h2>Bids</h2>
+    {% for bid in listing.bids.all %}
+        <p>{{ bid.amount }} - {{ bid.bidder }} - {{ bid.timestamp }}</p>
+    {% empty %}
+        <p>No bids yet.</p>
+    {% endfor %}
+
+    <!-- Display comments -->
+    <h2>Comments</h2>
+    {% for comment in listing.comments.all %}
+        <p>{{ comment.content }} - {{ comment.commenter }} - {{ comment.timestamp }}</p>
+    {% empty %}
+        <p>No comments yet.</p>
+    {% endfor %}
+
+    <!-- Bidding form -->
+    {% if user.is_authenticated and user != listing.seller %}
+        <h2>Place a Bid</h2>
+        <form method="post" action="{% url 'add_bid' listing.id %}">
+            {% csrf_token %}
+            {{ bidform.as_p }}
+            <button type="submit">Place Bid</button>
+        </form>
+    {% endif %}
+
+    <!-- Comment form -->
+    {% if user.is_authenticated %}
+        <h2>Add a Comment</h2>
+        <form method="post" action="{% url 'add_comment' listing.id %}">
+            {% csrf_token %}
+            {{ commentform.as_p }}
+            <button type="submit">Add Comment</button>
+        </form>
+    {% endif %}
+
+    <!-- Closing auction (if user is the seller) -->
+    {% if user.is_authenticated and user == listing.seller %}
+        <h2>Close Auction</h2>
+        <form method="post" action="{% url 'close_auction' listing.id %}">
+            {% csrf_token %}
+            <button type="submit">Close Auction</button>
+        </form>
+    {% endif %}
+{% endblock %}

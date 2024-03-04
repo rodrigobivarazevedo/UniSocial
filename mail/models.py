@@ -1,5 +1,5 @@
 from django.db import models
-from network.models import User  # Import the User model from the network app
+from network.models import User
 
 class Email(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="emails")
