@@ -19,6 +19,7 @@
                             <div class="card-body">
                                 <h5 class="card-title">{{ listing.title }}</h5>
                                 <p class="card-text">Current Price: {{ listing.current_price }}</p>
+                                <a href="{% url 'listing_detail' listing_id=listing.id %}" class="btn btn-primary mt-2">View Listing</a>
                             </div>
                         </a>
                     </div>

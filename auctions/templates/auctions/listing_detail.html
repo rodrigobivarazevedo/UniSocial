@@ -54,6 +54,14 @@
                         </form>
                     {% endif %}
                 {% endif %}
+
+                <!-- Closing auction (if user is the seller) -->
+                {% if user.is_authenticated and user == listing.seller %}
+                    <form method="post" action="{% url 'close_auction' listing.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger mt-2">Close Auction</button>
+                    </form>
+                {% endif %}
             </div>
         </div>
 
@@ -98,14 +106,5 @@
             </div>
         </div>
 
-        
-        <!-- Closing auction (if user is the seller) -->
-        {% if user.is_authenticated and user == listing.seller %}
-            <h2>Close Auction</h2>
-            <form method="post" action="{% url 'close_auction' listing.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Close Auction</button>
-            </form>
-        {% endif %}
     </div>
 {% endblock %}
