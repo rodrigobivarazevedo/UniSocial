@@ -2,24 +2,30 @@
 {% load static %}
 
 {% block body %}
-    <h2>Active Listings</h2>
-    <ul>
-        {% for listing in active_listings %}
-            <li>
-                <a href="{% url 'listing_detail' listing_id=listing.id %}">
-                    {{ listing.title }}
-                    <!-- Display the image if it exists -->
-                    {% if listing.image %}
-                        <img src="{{ listing.image.url }}" alt="{{ listing.title }}" style="max-width: 200px; max-height: 200px;">
-                    {% else %}
-                        <!-- Display a placeholder image if no image is uploaded -->
-                        <img src="{% static 'auctions/placeholder.jpg' %}" alt="Placeholder" style="max-width: 200px; max-height: 200px;">
-                    {% endif %}
-                </a>
-            </li>
-            <li>{{ listing.current_price }}</li>
-        {% endfor %}
-    </ul>
+    <div class="container">
+        <h2>Active Listings</h2>
+        <div class="row">
+            {% for listing in active_listings %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <a href="{% url 'listing_detail' listing_id=listing.id %}">
+                            <div style="height: 200px; overflow: hidden;">
+                                {% if listing.image %}
+                                    <img src="{{ listing.image.url }}" class="card-img-top" alt="{{ listing.title }}" style="width: 100%; height: auto;">
+                                {% else %}
+                                    <img src="{% static 'auctions/placeholder.jpg' %}" class="card-img-top" alt="Placeholder" style="width: 100%; height: auto;">
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ listing.title }}</h5>
+                                <p class="card-text">Current Price: {{ listing.current_price }}</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 {% endblock %}
 
 

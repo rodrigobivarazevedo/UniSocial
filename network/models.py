@@ -3,8 +3,7 @@ from django.db import models
 
 
 class User(AbstractUser):
-    pass
-   
+    watchlist = models.ManyToManyField('auctions.AuctionListing', related_name='watchlist_users')
 
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

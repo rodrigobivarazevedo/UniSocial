@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 
 from .models import AuctionListing, Bid, Comment
 from .forms import ListingForm, BidForm, CommentForm
+from network.models import User
 
 @login_required
 def auctions(request):
@@ -124,5 +125,4 @@ def close_auction(request, listing_id):
         messages.error(request, "You are not authorized to close this auction.")
 
     return redirect('listing_detail', listing_id=listing_id)
-
 

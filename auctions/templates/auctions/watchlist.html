@@ -1,17 +1,33 @@
 {% extends "auctions/layout.html" %}
+{% load static %}
 
 {% block body %}
-    <h2>Your Watchlist</h2>
-    {% if watchlist %}
-        <ul>
-            {% for listing in watchlist %}
-                <li>
-                    <a href="{% url 'listing_detail' listing_id=listing.id %}">
-                        {{ listing.title }}
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
+    <div class="container"> 
+        <h2>Your Watchlist</h2>
+            {% if watchlist %}
+            <div class="row">
+                {% for listing in watchlist %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <a href="{% url 'listing_detail' listing_id=listing.id %}">
+                                <div style="height: 200px; overflow: hidden;">
+                                    {% if listing.image %}
+                                        <img src="{{ listing.image.url }}" class="card-img-top" alt="{{ listing.title }}" style="width: 100%; height: auto;">
+                                    {% else %}
+                                        <img src="{% static 'auctions/placeholder.jpg' %}" class="card-img-top" alt="Placeholder" style="width: 100%; height: auto;">
+                                    {% endif %}
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ listing.title }}</h5>
+                                    <p class="card-text">Current Price: {{ listing.current_price }}</p>
+                                    <a href="{% url 'listing_detail' listing_id=listing.id %}" class="btn btn-primary mt-2">View Listing</a>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+    </div>
     {% else %}
         <p>Your watchlist is empty.</p>
     {% endif %}

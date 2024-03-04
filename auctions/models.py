@@ -3,7 +3,6 @@ from django.conf import settings
 from django.utils import timezone
 from network.models import User
 
-
 class AuctionListing(models.Model):
     STATUS_CHOICES = (
         ('active', 'Active'),

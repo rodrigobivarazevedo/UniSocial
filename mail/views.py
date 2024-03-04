@@ -12,6 +12,7 @@ from .models import Email
 from network.models import User
 
 
+@login_required
 def mail(request):
     # Authenticated users view their inbox
     if request.user.is_authenticated:
@@ -22,7 +23,7 @@ def mail(request):
         return HttpResponseRedirect(reverse("login"))
 
 
-@csrf_exempt
+
 @login_required
 def compose(request):
 
@@ -99,7 +100,7 @@ def mailbox(request, mailbox):
     return JsonResponse([email.serialize() for email in emails], safe=False)
 
 
-@csrf_exempt
+
 @login_required
 def email(request, email_id):
 
