@@ -9,8 +9,6 @@ import json
 from django.contrib.auth.decorators import login_required
 
 
-
-
 from .forms import PostForm
 from .models import Post, Comment, Like, UserProfile, User
 
@@ -23,7 +21,8 @@ def index(request):
             post.user = request.user
             post.save()
             messages.success(request, 'Your post was successfully posted!')
-        return render(request, 'network/index.html')
+            post_id = post.id  # Assign the post ID
+        return render(request, 'network/index.html', {'post_id': post_id})
     return render(request, "network/index.html")
 
 
@@ -55,7 +54,7 @@ def load_posts(request):
         data = {
             'posts': serialized_posts,
         }
-        return JsonResponse(data, safe=True)
+        return JsonResponse(data, safe=True, status=200)
     
     elif request.method == "GET" and request.GET.get("user") == "following":
         start = int(request.GET.get("start") or 0)
@@ -89,7 +88,7 @@ def load_posts(request):
         data = {
             'posts': serialized_posts,
         }
-        return JsonResponse(data, safe=True)
+        return JsonResponse(data, safe=True, status=200)
     
     
     elif request.method == "GET" and request.GET.get("user") != "all" and request.GET.get("user") != "following":
@@ -121,10 +120,8 @@ def load_posts(request):
         data = {
             'posts': serialized_posts,
         }
-        return JsonResponse(data, safe=True)
+        return JsonResponse(data, safe=True, status=200)
     
-
-
 
 @login_required
 def comments(request):
@@ -145,7 +142,7 @@ def comments(request):
 
         data['comments'] = serialized_comments  # Add serialized comments to the response
 
-        return JsonResponse(data, safe=True)
+        return JsonResponse(data, safe=True, status=200)
 
     elif request.method == "POST":
         # Handle the case where posting a comment

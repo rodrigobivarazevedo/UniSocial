@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import Client,TestCase
 from django.contrib.auth import get_user_model
 from .models import Post, Like, UserProfile, Comment
 from datetime import datetime
