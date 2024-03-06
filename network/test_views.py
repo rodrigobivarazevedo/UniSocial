@@ -15,6 +15,7 @@ class NetworkClientTests(TestCase):
         Set up initial data for the tests.
         """
         self.user = User.objects.create_user(username='test_user', password='password')
+        UserProfile.objects.create(user=self.user)
         self.client = Client()
         self.client.force_login(self.user)
 
@@ -23,7 +24,7 @@ class NetworkClientTests(TestCase):
         Test the index view.
         """
         # Log in the user
-        self.client.force_login(self.user)
+       # self.client.force_login(self.user)
 
         # Send a POST request to the index view
         response = self.client.post(reverse('index'), {'content': 'Test post content'})
@@ -37,7 +38,7 @@ class NetworkClientTests(TestCase):
         Test the load_posts view.
         """
         # Log in the user
-        self.client.force_login(self.user)
+        #self.client.force_login(self.user)
 
         # Send a GET request to the load_posts view for all users
         response = self.client.get(reverse('load_posts') + '?user=all')
@@ -101,38 +102,50 @@ class NetworkClientTests(TestCase):
         """
         Test the likes view.
         """
-        # Log in the user
-        self.client.force_login(self.user)
 
         # Create a post
-        post_response = self.client.post(reverse('index'), {'content': 'Test post content'})
+        post = Post.objects.create(user=self.user, content='Test post content')
 
-        # Send a POST request to the likes view
-        like_response = self.client.post(reverse('likes'), {'post_id': post_response.context["post_id"]})
-
+        # Send a POST request to post a like
+        data = {'post_id': post.id}
+        response = self.client.post(reverse('likes'), data=json.dumps(data), content_type='application/json')
+    
         # Check if the like was successfully added
-        self.assertIn(like_response.status_code, [200, 201])
+        self.assertIn(response.status_code, [200, 201])
+
+        # Check if the comment was successfully posted
+        self.assertEqual(response.status_code, 201)
+        
+        # Check if the comment count is incremented
+        likes_count = Like.objects.filter(post=post).count()
+        self.assertEqual(likes_count, 1)
+        
 
     def test_profile_view(self):
         """
         Test the profile view.
         """
         # Log in the user
-        self.client.force_login(self.user)
-
+        #self.client.force_login(self.user)
         # Send a GET request to the profile view
         response = self.client.get(reverse('profile', args=[self.user.username]))
 
         # Check if the response contains user profile data
         self.assertEqual(response.status_code, 200)
         self.assertIn('user_profile', response.context)
+        # Get the UserProfile object from the response context
+        user_profile = response.context['user_profile']
+        
+        # Check if the username in the UserProfile matches the username in the request
+        self.assertEqual(user_profile.user.username, self.user.username)
 
+  
     def test_following_view(self):
         """
         Test the following view.
         """
         # Log in the user
-        self.client.force_login(self.user)
+        #self.client.force_login(self.user)
 
         # Send a GET request to the following view
         response = self.client.get(reverse('following', args=[self.user.username]))
@@ -150,12 +163,19 @@ class NetworkClientTests(TestCase):
 
         # Create another user
         user2 = User.objects.create_user(username='test_user2', password='password')
+        UserProfile.objects.create(user=user2)
 
         # Send a POST request to the follow view
         follow_response = self.client.post(reverse('follow', args=[user2.username]))
 
         # Check if the user was successfully followed
         self.assertEqual(follow_response.status_code, 302)  # Redirect status code
+
+        # Check if the logged-in user is following the new user
+        user_profile = UserProfile.objects.get(user=self.user)
+        is_following = user_profile.following.filter(username=user2.username).exists()
+        self.assertTrue(is_following, "Logged-in user should be following the new user after follow request")
+
 
     def test_unfollow_view(self):
         """
@@ -166,6 +186,7 @@ class NetworkClientTests(TestCase):
 
         # Create another user
         user2 = User.objects.create_user(username='test_user2', password='password')
+        UserProfile.objects.create(user=user2)
 
         # Follow the other user
         self.client.post(reverse('follow', args=[user2.username]))
@@ -175,6 +196,12 @@ class NetworkClientTests(TestCase):
 
         # Check if the user was successfully unfollowed
         self.assertEqual(unfollow_response.status_code, 302)  # Redirect status code
+
+        # Check if the logged-in user is not following the other user anymore
+        user_profile = UserProfile.objects.get(user=self.user)
+        is_following = user_profile.following.filter(username=user2.username).exists()
+        self.assertFalse(is_following, "Logged-in user should not be following the other user after unfollow request")
+
 
     def test_login_view(self):
         """
@@ -191,7 +218,7 @@ class NetworkClientTests(TestCase):
         Test the logout view.
         """
         # Log in the user
-        self.client.force_login(self.user)
+        #self.client.force_login(self.user)
 
         # Send a POST request to the logout view
         response = self.client.post(reverse('logout'))
