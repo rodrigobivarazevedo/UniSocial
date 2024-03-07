@@ -53,27 +53,32 @@ def compose(request):
     # Get contents of email
     subject = data.get("subject", "")
     body = data.get("body", "")
+    
+    if body:
+        # Create one email for each recipient, plus sender
+        users = set()
+        users.add(request.user)
+        users.update(recipients)
+        for user in users:
+            email = Email(
+                user=user,
+                sender=request.user,
+                subject=subject,
+                body=body,
+                read=user == request.user
+            )
+            email.save()
+            for recipient in recipients:
+                email.recipients.add(recipient)
+            email.save()
 
-    # Create one email for each recipient, plus sender
-    users = set()
-    users.add(request.user)
-    users.update(recipients)
-    for user in users:
-        email = Email(
-            user=user,
-            sender=request.user,
-            subject=subject,
-            body=body,
-            read=user == request.user
-        )
-        email.save()
-        for recipient in recipients:
-            email.recipients.add(recipient)
-        email.save()
+        messages.success(request, "Email sent successfully.")  # Add success message
 
-    messages.success(request, "Email sent successfully.")  # Add success message
+        return JsonResponse({"message": "Email sent successfully."}, status=201)
+    else:
+        messages.error(request, "Add a body content.")  # Add error message
+        return JsonResponse({"error": "Missing body content."}, status=400)
 
-    return JsonResponse({"message": "Email sent successfully."}, status=201)
 
 @csrf_exempt
 @login_required
