@@ -14,8 +14,6 @@ class AuctionsTests(TestCase):
         self.listing = AuctionListing.objects.create(
             title='Test Listing',
             description='Test Description',
-            start_time=timezone.now(),
-            end_time=timezone.now() + timezone.timedelta(days=1),
             starting_bid=Decimal('10.00'),
             category='Test Category',
             seller=self.user
