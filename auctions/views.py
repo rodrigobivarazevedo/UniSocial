@@ -20,8 +20,7 @@ def create_listing(request):
         if form.is_valid():
             listing = form.save(commit=False)
             listing.seller = request.user
-            listing.start_time = datetime.now()  # Set start_time to current date and time
-            listing.end_time = listing.start_time + timedelta(hours=24)  # Set end_time to 24 hours after start_time
+            listing.current_price = listing.starting_bid
             # Save the uploaded image file
             listing.save()
             return redirect(reverse('auctions'))
@@ -85,7 +84,6 @@ def add_comment(request, listing_id):
     else:
         form = CommentForm()
     return render(request, 'auctions/add_comment.html', {'form': form, 'listing': listing})
-
 
 
 @login_required

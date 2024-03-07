@@ -12,8 +12,6 @@ class AuctionListing(models.Model):
  
     title = models.CharField(max_length=100)
     description = models.TextField()
-    start_time = models.DateTimeField(default=timezone.now)
-    end_time = models.DateTimeField()
     starting_bid = models.DecimalField(max_digits=10, decimal_places=2)
     current_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Add current_price field
     category = models.CharField(max_length=50, blank=True)

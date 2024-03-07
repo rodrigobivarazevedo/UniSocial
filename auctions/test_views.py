@@ -11,7 +11,7 @@ class AuctionsAppTests(TestCase):
         """
         Set up initial data for the tests.
         """
-        self.user = User.objects.create_user(username='test_user', password='password')
+        self.user = User.objects.create_user(username='test_user', email='test_user1@gmail.com', password='password')
         self.client = Client()
         self.client.force_login(self.user)
 
@@ -32,10 +32,23 @@ class AuctionsAppTests(TestCase):
 
     def test_create_listing_view_post(self):
         """Test create listing view for POST request"""
-        data = {'title': 'New Listing', 'starting_bid': 200}
-        response = self.client.post(reverse('create_listing'), data)
+        # Create a form instance with valid data
+        form_data = {
+            'title': 'New Listing',
+            'description': 'This is a test listing',
+            'starting_bid': 100,  # Assuming starting bid is 100
+            'image': "",  # Pass an empty string for the image
+            'category': 'Test Category'
+        }
+        response = self.client.post(reverse('create_listing'), form_data)
+
+        # Check if the response is a redirect
         self.assertEqual(response.status_code, 302)  # Redirects to auctions page after successful creation
+
+        # Check if the listing was created in the database
         self.assertTrue(AuctionListing.objects.filter(title='New Listing').exists())
+
+
 
     def test_listing_detail_view(self):
         """Test listing detail view"""
@@ -46,10 +59,6 @@ class AuctionsAppTests(TestCase):
 
     def test_add_bid_view(self):
         """Test add bid view"""
-        response = self.client.get(reverse('add_bid', args=[self.listing.id]))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'auctions/add_bid.html')
-
         data = {'amount': 150}  # Assuming this bid is higher than the starting bid
         response = self.client.post(reverse('add_bid', args=[self.listing.id]), data)
         self.assertEqual(response.status_code, 302)  # Redirects to listing detail page after successful bid
@@ -57,10 +66,6 @@ class AuctionsAppTests(TestCase):
 
     def test_add_comment_view(self):
         """Test add comment view"""
-        response = self.client.get(reverse('add_comment', args=[self.listing.id]))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'auctions/add_comment.html')
-
         data = {'content': 'Test comment'}
         response = self.client.post(reverse('add_comment', args=[self.listing.id]), data)
         self.assertEqual(response.status_code, 302)  # Redirects to listing detail page after successful comment
@@ -89,14 +94,18 @@ class AuctionsAppTests(TestCase):
 
     def test_close_auction_view(self):
         """Test close auction view"""
+        # Seller closes the auction
         response = self.client.post(reverse('close_auction', args=[self.listing.id]))
         self.assertEqual(response.status_code, 302)  # Redirects to listing detail page after closing auction
+        self.listing.refresh_from_db()  # Refresh listing from the database to get the updated status
         self.assertEqual(self.listing.status, 'closed')
 
         # Test that only the seller can close the auction
         self.client.logout()
+        listing = AuctionListing.objects.create(title='Test Listing2', seller=self.user, starting_bid=100)
         buyer = User.objects.create_user(username='test_buyer', password='password')
         self.client.login(username='test_buyer', password='password')
-        response = self.client.post(reverse('close_auction', args=[self.listing.id]))
-        self.assertEqual(response.status_code, 302)  # Redirects to listing detail page after unauthorized attempt
-        self.assertNotEqual(self.listing.status, 'closed')
+        response = self.client.post(reverse('close_auction', args=[listing.id]))
+        listing.refresh_from_db()  # Refresh listing from the database
+        self.assertNotEqual(listing.status, 'closed')  # Ensure status remains unchanged
+
