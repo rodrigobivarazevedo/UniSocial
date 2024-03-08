@@ -25,5 +25,6 @@ jobs:
         python3 manage.py test mail
         python3 manage.py test auctions
         python3 manage.py test network.test_views
+        python3 manage.py test network.test_thread
         python3 manage.py test mail.test_views
         python3 manage.py test auctions.test_views

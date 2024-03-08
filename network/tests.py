@@ -1,8 +1,8 @@
-from django.test import Client,TestCase
+from django.test import TestCase
 from django.contrib.auth import get_user_model
 from .models import Post, Like, UserProfile, Comment
 from datetime import datetime
-import threading
+
 
 User = get_user_model()
 
@@ -52,31 +52,7 @@ class NetworkTests(TestCase):
         self.assertEqual(comment.user, self.user2)
         self.assertEqual(comment.post, post)
         self.assertEqual(comment.content, "Test comment")
-    """
-    def test_concurrent_like_creation(self):
         
-        Test whether multiple users can like a post concurrently.
-       
-        post = Post.objects.create(user=self.user1, content="Test content")
-
-        def like_post(user):
-            Like.objects.create(user=user, post=post)
-
-        # Create threads for liking the post
-        threads = []
-        for user in [self.user1, self.user2]:  # Example users
-            thread = threading.Thread(target=like_post, args=(user,))
-            thread.start()
-            threads.append(thread)
-
-        # Wait for all threads to complete
-        for thread in threads:
-            thread.join()
-
-        # Check if all likes are created
-        likes_count = Like.objects.filter(post=post).count()
-        self.assertEqual(likes_count, 2)  # Assuming three users liked the post concurrently
-        """
     def test_concurrent_like_creation_without_thread(self):
         """
         Test whether multiple users can like a post concurrently without thread.
