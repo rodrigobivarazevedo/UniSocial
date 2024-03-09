@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.db.models import Count
 import json
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import cache_page
 
 
 from .forms import PostForm
@@ -187,8 +188,8 @@ def likes(request):
         # Handle GET requests if needed
         pass
 
-
-@login_required
+@cache_page(60 * 5)  # Cache for 5 minutes
+#@login_required
 def profile(request, username):
     # Get the user profile based on the username
     user = get_object_or_404(User, username=username)
@@ -213,6 +214,7 @@ def profile(request, username):
     }
     return render(request, 'network/profile.html', context)
 
+@cache_page(60 * 5)  # Cache for 5 minutes
 @login_required
 def following(request, username):
      # Get the user profile based on the username
