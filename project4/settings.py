@@ -75,14 +75,6 @@ WSGI_APPLICATION = 'project4.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-"""
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-"""
 
 DATABASES = {
     'default': {
@@ -95,6 +87,7 @@ DATABASES = {
     }
 }
 
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -104,6 +97,15 @@ CACHES = {
         }
     }
 }
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+SESSION_COOKIE_NAME = 'sessionid'
+SESSION_COOKIE_PATH = '/'
+SESSION_COOKIE_SECURE = True  # Set to True if using HTTPS
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 3600  # Session expiry time in seconds (e.g., 1 hour)
+
 
 
 AUTH_USER_MODEL = "network.User"

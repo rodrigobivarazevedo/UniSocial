@@ -189,7 +189,7 @@ def likes(request):
         pass
 
 @cache_page(60 * 5)  # Cache for 5 minutes
-#@login_required
+@login_required
 def profile(request, username):
     # Get the user profile based on the username
     user = get_object_or_404(User, username=username)
