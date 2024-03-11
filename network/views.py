@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_page
 
 
-from .forms import PostForm
+from .forms import PostForm, UserProfileForm
 from .models import Post, Comment, Like, UserProfile, User
 
     
@@ -259,6 +259,15 @@ def unfollow(request, username):
 
     return redirect('profile', username=username)
 
+def edit_profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile', username=request.user.username)  # Redirect to profile page after editing
+    else:
+        form = UserProfileForm(instance=request.user.userprofile)
+    return render(request, 'network/edit_profile.html', {'form': form})
 
 
 def login_view(request):

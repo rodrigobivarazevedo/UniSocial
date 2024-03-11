@@ -5,6 +5,7 @@ from django.db import models
 class User(AbstractUser):
     watchlist = models.ManyToManyField('auctions.AuctionListing', related_name='watchlist_users')
 
+
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
@@ -18,6 +19,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     followers = models.ManyToManyField(User, related_name='followers')
     following = models.ManyToManyField(User, related_name='following')
+    bio = models.TextField(blank=True)
+    picture = models.ImageField(upload_to='profile_pics/', blank=True)
     
    
 class Comment(models.Model):

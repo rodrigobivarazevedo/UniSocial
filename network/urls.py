@@ -1,5 +1,7 @@
 
 from django.urls import path
+from django.conf.urls.static import static
+from django.conf import settings
 
 from . import views
 
@@ -18,4 +20,5 @@ urlpatterns = [
     path('follow/<str:username>/', views.follow, name='follow'),
     path('unfollow/<str:username>/', views.unfollow, name='unfollow'),
     path('following/<str:username>/', views.following, name='following'),
-]
+    path('edit_profile/', views.edit_profile, name='edit_profile')
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

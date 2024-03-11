@@ -3,7 +3,6 @@
 
 {% block body %}
     {% if user_profile %}
-
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
@@ -19,22 +18,45 @@
         <div class="container-fluid mb-5 mt-5">
             <div class="row">
                 <div class="col-md-8 offset-md-2">
-                    <h1>{{ user_profile.user.username }}</h1>
-                    <p>Followers: {{ user_profile.followers.count }}</p>
-                    <p>Following: {{ user_profile.following.count }}</p>
-                    {% if can_follow %}
-                            {% if is_following %}
-                                <form method="post" action="{% url 'unfollow' username=user_profile.user.username %}">
-                                    {% csrf_token %}
-                                    <button type="submit">Unfollow</button>
-                                </form>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <!-- User Profile Picture -->
+                            {% if user_profile.picture %}
+                                <img src="{{ user_profile.picture.url }}" class="img-fluid rounded-circle" alt="Profile Picture">
                             {% else %}
-                                <form method="post" action="{% url 'follow' username=user_profile.user.username %}">
-                                    {% csrf_token %}
-                                    <button type="submit">Follow</button>
-                                </form>
+                                <img src="{% static 'network/profile_placeholder.png' %}" class="img-fluid rounded-circle" alt="Placeholder">
                             {% endif %}
-                    {% endif %}
+                        </div>
+                        <div class="col-md-3">
+                            <!-- User Profile Information -->
+                            <h1>{{ user_profile.user.username }}</h1>
+                            <p>Followers: {{ user_profile.followers.count }}  Following: {{ user_profile.following.count }}</p>
+    
+                            {% if can_follow %}
+                                {% if is_following %}
+                                    <form method="post" action="{% url 'unfollow' username=user_profile.user.username %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-secondary btn-sm">Unfollow</button>
+                                    </form>
+                                {% else %}
+                                    <form method="post" action="{% url 'follow' username=user_profile.user.username %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success btn-sm">Follow</button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
+                            <!-- Edit Profile Button (Visible only if the current user can edit the profile) -->
+                            {% if request.user == user_profile.user%}
+                                <a href="{% url 'edit_profile' %}" class="btn btn-secondary btn-sm">Edit Profile</a>
+                            {% endif %}
+                        </div>
+                        <!-- Bio (Displayed on the right side if exists) -->
+                        {% if user_profile.bio %}
+                        <div class="col-md-6">
+                            <p>{{ user_profile.bio }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -45,7 +67,6 @@
         <p>No user profile found.</p>
     {% endif %}
 {% endblock %}
-
 
 {% block script %}
     <script>
