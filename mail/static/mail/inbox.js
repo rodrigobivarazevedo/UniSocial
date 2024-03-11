@@ -58,10 +58,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const recipients = document.querySelector('#compose-recipients').value;
         const subject = document.querySelector('#compose-subject').value;
         const body = document.querySelector('#compose-body').value;
-  
+        const csrftoken = getCookie('csrftoken');
         // Send email data to server
         fetch('/mail/emails', {
             method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrftoken // Include CSRF token in headers
+            },
             body: JSON.stringify({
                 recipients: recipients,
                 subject: subject,
@@ -85,8 +89,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .then(result => {
-            // Print result
-            console.log(result);
             load_mailbox("sent");
             // Display success message
             successMessage.textContent = result.message;
@@ -205,10 +207,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create div for clicked email details
         const clickedEmailElement = document.createElement('div');
         clickedEmailElement.classList.add('email');
-  
+        const csrftoken = getCookie('csrftoken');
         // Update read status of the email
         fetch(`/mail/emails/${emailId}`, {
           method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken // Include CSRF token in headers
+          },
           body: JSON.stringify({
               read: true
           })
@@ -249,24 +255,47 @@ document.addEventListener('DOMContentLoaded', function() {
 
   
   function archiveEmail(emailId, newArchiveState, targetmailbox) {
+    // Extract CSRF token from cookie
+    const csrftoken = getCookie('csrftoken');
     // Send PUT request to archive email
     fetch(`/mail/emails/${emailId}`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        archived: newArchiveState
-      })
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken // Include CSRF token in headers
+        },
+        body: JSON.stringify({
+            archived: newArchiveState
+        })
     })
     .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to archive email.');
-      }
-      
-      // Load the appropriate mailbox after archiving
-      load_mailbox(targetmailbox);
+        if (!response.ok) {
+            throw new Error('Failed to archive email.');
+        }
+        
+        // Load the appropriate mailbox after archiving
+        load_mailbox(targetmailbox);
     })
     .catch(error => {
-      console.error('Error:', error);
-      // Handle error
+        console.error('Error:', error);
+        // Handle error
     });
-  }
+}
+
   
+
+// Function to extract CSRF token from cookie
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.startsWith(name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+          }
+      }
+  }
+  return cookieValue;
+}

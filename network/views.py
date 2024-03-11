@@ -188,7 +188,7 @@ def likes(request):
         # Handle GET requests if needed
         pass
 
-@cache_page(60 * 5)  # Cache for 5 minutes
+#@cache_page(60 * 5)  # Cache for 5 minutes
 @login_required
 def profile(request, username):
     # Get the user profile based on the username
