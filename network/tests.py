@@ -6,7 +6,7 @@ from datetime import datetime
 
 User = get_user_model()
 
-class NetworkTests(TestCase):
+class NetworkModelTests(TestCase):
     def setUp(self):
         """
         This method is used to set up any initial state needed for the tests. In this case, we're creating two users.
