@@ -22,6 +22,8 @@ def index(request):
             post.user = request.user
             post.save()
             messages.success(request, 'Your post was successfully posted!')
+            request.session['messages'] = []
+
             post_id = post.id  # Assign the post ID
         return render(request, 'network/index.html', {'post_id': post_id})
     return render(request, "network/index.html")
@@ -284,6 +286,8 @@ def login_view(request):
             return HttpResponseRedirect(reverse("index"))
         else:
             messages.error(request, 'Invalid username and/or password.')
+            request.session['messages'] = []
+
             return render(request, "network/login.html")
     else:
         return render(request, "network/login.html")
@@ -304,6 +308,8 @@ def register(request):
         confirmation = request.POST["confirmation"]
         if password != confirmation:
             messages.error(request, 'Passwords must match.')
+            request.session['messages'] = []
+
             return render(request, "network/register.html")
 
         # Attempt to create new user
@@ -313,9 +319,13 @@ def register(request):
             user_profile = UserProfile.objects.create(user=user)
             login(request, user)
             messages.success(request, 'Account created')
+            request.session['messages'] = []
+
             return redirect("index")
         except IntegrityError:
             messages.error(request, 'Username already taken.')
+            request.session['messages'] = []
+
             return render(request, "network/register.html")
     else:
         return render(request, "network/register.html")

@@ -11,6 +11,53 @@ document.addEventListener('DOMContentLoaded', function() {
             alert.remove();
         });
     }, 5000); // 5000 milliseconds = 5 seconds
+
+    document.querySelector('#messagebutton').addEventListener('click', function() {
+        // Show the compose modal
+        var composeModal = new bootstrap.Modal(document.getElementById('composeModal'));
+        composeModal.show();
+      });
+
+      // Add event listener for form submission
+      document.querySelector('#compose-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+    
+        const body = document.querySelector('#message').value;
+        const csrftoken = getCookie('csrftoken');
+    
+        // Send email data to server
+        fetch('/mail/emails', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrftoken // Include CSRF token in headers
+            },
+            body: JSON.stringify({
+                recipients: userProfileUsername,
+                body: body
+            })
+        })
+        .then(response => {
+            // Handle response
+            if (response.ok) {
+                // If the response is successful, do something
+                location.reload();
+            } else {
+                // If the response is not successful, handle the error
+                console.error("Failed to send email.");
+            }
+        })
+        .catch(error => {
+            // Handle network errors
+            console.error('Error:', error);
+        });
+    
+        // Close the modal after sending the message
+        var composeModal = bootstrap.Modal.getInstance(document.getElementById('composeModal'));
+        composeModal.hide();
+    });
+    
+    
 });
 
 
@@ -215,3 +262,5 @@ function updateCommentCount(post_id, comments_count) {
         commentsCountElement.textContent = comments_count;
     }
 }
+
+

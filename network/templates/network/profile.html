@@ -44,6 +44,8 @@
                                         <button type="submit" class="btn btn-success btn-sm">Follow</button>
                                     </form>
                                 {% endif %}
+                                <button id="messagebutton" class="btn btn-secondary btn-sm mt-2">Message</button>
+
                             {% endif %}
                             <!-- Edit Profile Button (Visible only if the current user can edit the profile) -->
                             {% if request.user == user_profile.user%}
@@ -61,6 +63,32 @@
             </div>
         </div>
 
+        <!-- Modal for composing a message -->
+        <div class="modal fade" id="composeModal" tabindex="-1" aria-labelledby="composeModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="composeModalLabel">Compose Message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                <!-- Form for composing the message -->
+                <form id="compose-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                    <label for="message" class="form-label">Message:</label>
+                    <textarea class="form-control" id="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+                </div>
+            </div>
+            </div>
+        </div>
+
+  
+  
+
         <div id="posts" class="container-fluid mt-5"></div>
 
     {% else %}
@@ -73,4 +101,5 @@
         const userProfileUsername = "{{ user_profile.user.username }}";
     </script>
     <script src="{% static 'network/profile.js' %}"></script>
+  
 {% endblock %}

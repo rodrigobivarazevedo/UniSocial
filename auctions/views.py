@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from datetime import datetime, timedelta
+
 
 from .models import AuctionListing, Bid, Comment
 from .forms import ListingForm, BidForm, CommentForm
@@ -60,8 +60,12 @@ def add_bid(request, listing_id):
                 listing.save()
                 
                 messages.success(request, 'Bid placed successfully.')
+                request.session['messages'] = []
+
             else:
                 messages.error(request, 'Bid must be greater than the starting bid and any previous bids.')
+                request.session['messages'] = []
+
             
             return redirect('listing_detail', listing_id=listing_id)
     else:
@@ -80,6 +84,8 @@ def add_comment(request, listing_id):
             comment = Comment(content=content, commenter=request.user, auction_listing=listing)
             comment.save()
             messages.success(request, 'Comment added successfully.')
+            request.session['messages'] = []
+
             return redirect('listing_detail', listing_id=listing_id)
     else:
         form = CommentForm()
@@ -119,8 +125,11 @@ def close_auction(request, listing_id):
         listing.save()
 
         messages.success(request, "Auction closed successfully.")
+        request.session['messages'] = []
     else:
         messages.error(request, "You are not authorized to close this auction.")
+        request.session['messages'] = []
+
 
     return redirect('listing_detail', listing_id=listing_id)
 
