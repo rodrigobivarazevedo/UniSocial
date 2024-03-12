@@ -87,7 +87,7 @@ DATABASES = {
     }
 }
 
-
+"""
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -106,7 +106,7 @@ SESSION_COOKIE_SECURE = True  # Set to True if using HTTPS
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_AGE = 3600  # Session expiry time in seconds (e.g., 1 hour)
 
-
+"""
 
 AUTH_USER_MODEL = "network.User"
 

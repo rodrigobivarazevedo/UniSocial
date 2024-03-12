@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.db.models import Count
 import json
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.cache import cache_page
+#from django.views.decorators.cache import cache_page
 
 
 from .forms import PostForm, UserProfileForm
@@ -216,7 +216,7 @@ def profile(request, username):
     }
     return render(request, 'network/profile.html', context)
 
-@cache_page(60 * 5)  # Cache for 5 minutes
+#@cache_page(60 * 5)  # Cache for 5 minutes
 @login_required
 def following(request, username):
      # Get the user profile based on the username
