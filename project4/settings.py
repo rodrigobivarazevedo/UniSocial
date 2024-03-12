@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -86,6 +87,8 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+TEST_DATABASE_TIMEOUT = 60  # Set timeout to 60 seconds (adjust as needed)
 
 """
 CACHES = {
