@@ -67,3 +67,6 @@ class NetworkTests(TestCase):
         likes_count = Like.objects.filter(post=post).count()
         self.assertEqual(likes_count, 3)
 
+    
+    
+
