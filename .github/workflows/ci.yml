@@ -6,21 +6,6 @@ jobs:
   unit-tests:
     runs-on: ubuntu-latest
     
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_USER: rodrigo
-          POSTGRES_PASSWORD: rodrigo
-          POSTGRES_DB: network
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -36,9 +21,15 @@ jobs:
     - name: Run Django unit tests
       run: |
         pip3 install --user django
-        python3 manage.py test network
-        python3 manage.py test mail
-        python3 manage.py test auctions
-        python3 manage.py test network.test_views
-        python3 manage.py test mail.test_views
-        python3 manage.py test auctions.test_views
+        
+        # Generate a unique identifier for the test database name
+        TEST_DB_NAME="test_network_$RANDOM"
+        
+        # Run tests using the unique test database name
+        python3 manage.py test network --test-name-pattern="test_*.py" --keepdb --settings=settings.test --database="$TEST_DB_NAME"
+        python3 manage.py test mail --test-name-pattern="test_*.py" --keepdb --settings=settings.test --database="$TEST_DB_NAME"
+        python3 manage.py test auctions --test-name-pattern="test_*.py" --keepdb --settings=settings.test --database="$TEST_DB_NAME"
+        python3 manage.py test network.test_views --test-name-pattern="test_*.py" --keepdb --settings=settings.test --database="$TEST_DB_NAME"
+        python3 manage.py test network.test_thread --test-name-pattern="test_*.py" --keepdb --settings=settings.test --database="$TEST_DB_NAME"
+        python3 manage.py test mail.test_views --test-name-pattern="test_*.py" --keepdb --settings=settings.test --database="$TEST_DB_NAME"
+        python3 manage.py test auctions.test_views --test-name-pattern="test_*.py" --keepdb --settings=settings.test --database="$TEST_DB_NAME"
