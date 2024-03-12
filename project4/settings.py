@@ -82,16 +82,15 @@ DATABASES = {
         'NAME': 'network',
         'USER': 'rodrigo',
         'PASSWORD': 'rodrigo',
-        'HOST': 'localhost',  # Or the host where your PostgreSQL server is running
-        'PORT': '5432',       # Default PostgreSQL port
+        'HOST': 'db',  # Docker Compose service name
+        'PORT': '5432',
     }
 }
-
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",  # Redis server address
+        "LOCATION": "redis://redis:6379/1",  # Docker Compose service name
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }

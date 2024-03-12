@@ -44,47 +44,47 @@ class MailViewsTest(TestCase):
 
     def test_compose_view_valid_recipient(self):
         """ Test compose view with one valid recipient"""
-        data = {'recipients': 'test_user2@example.com', 'subject': 'Test', 'body': 'Test email body'}
+        data = {'recipients': 'test_user2', 'subject': 'Test', 'body': 'Test email body'}
         response = self.client.post(reverse('compose'), data, content_type='application/json')
         self.assertEqual(response.status_code, 201)
 
         # Check response content
         self.assertIn('message', response.json())
-        self.assertEqual(response.json()['message'], 'Email sent successfully.')
+        self.assertEqual(response.json()['message'], 'Message sent successfully.')
 
         # Check database changes
         sent_email = Email.objects.first()
         self.assertIsNotNone(sent_email)
         self.assertEqual(sent_email.sender, self.user)
         self.assertEqual(sent_email.recipients.count(), 1)
-        self.assertEqual(sent_email.recipients.first().email, 'test_user2@example.com')
+        self.assertEqual(sent_email.recipients.first().username, 'test_user2')
         self.assertEqual(sent_email.subject, 'Test')
         self.assertEqual(sent_email.body, 'Test email body')
 
     def test_compose_view_valid_recipients(self):
         """ Test compose view with multiple valid recipients"""
-        data = {'recipients': 'test_user2@example.com, test_user3@example.com', 'subject': 'Test', 'body': 'Test email body'}
+        data = {'recipients': 'test_user2, test_user3', 'subject': 'Test', 'body': 'Test email body'}
         response = self.client.post(reverse('compose'), data, content_type='application/json')
         self.assertEqual(response.status_code, 201)
 
         # Check response content
         self.assertIn('message', response.json())
-        self.assertEqual(response.json()['message'], 'Email sent successfully.')
+        self.assertEqual(response.json()['message'], 'Message sent successfully.')
 
         # Check database changes
         sent_email = Email.objects.first()
         self.assertIsNotNone(sent_email)
         self.assertEqual(sent_email.sender, self.user)
         self.assertEqual(sent_email.recipients.count(), 2)
-        recipient_emails = [recipient.email for recipient in sent_email.recipients.all()]
-        self.assertIn('test_user2@example.com', recipient_emails)
-        self.assertIn('test_user3@example.com', recipient_emails)
+        recipient_emails = [recipient.username for recipient in sent_email.recipients.all()]
+        self.assertIn('test_user2', recipient_emails)
+        self.assertIn('test_user3', recipient_emails)
         self.assertEqual(sent_email.subject, 'Test')
         self.assertEqual(sent_email.body, 'Test email body')
 
     def test_mailbox_view(self):
         """ Test mailbox view """
-        data = {'recipients': 'test_user1@example.com', 'subject': 'Test', 'body': 'Test email body'}
+        data = {'recipients': 'test_user1', 'subject': 'Test', 'body': 'Test email body'}
         self.client.post(reverse('compose'), data, content_type='application/json')
         response = self.client.get(reverse('mailbox', args=['inbox']))
         self.assertEqual(response.status_code, 200)
@@ -106,7 +106,7 @@ class MailViewsTest(TestCase):
     def test_email_view_get(self):
         """ Test email view for GET request"""
         # Compose an email
-        data = {'recipients': 'test_user2@example.com', 'subject': 'Test', 'body': 'Test email body'}
+        data = {'recipients': 'test_user2', 'subject': 'Test', 'body': 'Test email body'}
         self.client.post(reverse('compose'), data, content_type='application/json')
 
         # Retrieve the ID of the composed email
@@ -123,7 +123,7 @@ class MailViewsTest(TestCase):
         self.assertIsNotNone(sent_email)
         self.assertEqual(sent_email.sender, self.user)
         self.assertEqual(sent_email.recipients.count(), 1)
-        self.assertEqual(sent_email.recipients.first().email, 'test_user2@example.com')
+        self.assertEqual(sent_email.recipients.first().username, 'test_user2')
         self.assertEqual(sent_email.subject, 'Test')
         self.assertEqual(sent_email.body, 'Test email body')
 
@@ -131,7 +131,7 @@ class MailViewsTest(TestCase):
     def test_email_view_put_mark_as_read(self):
         """ Test email view for PUT request to mark email as read """
         # Compose an email
-        data = {'recipients': 'test_user2@example.com', 'subject': 'Test', 'body': 'Test email body'}
+        data = {'recipients': 'test_user2', 'subject': 'Test', 'body': 'Test email body'}
         self.client.post(reverse('compose'), data, content_type='application/json')
 
         # Retrieve the ID of the composed email
@@ -148,7 +148,7 @@ class MailViewsTest(TestCase):
     def test_email_view_put_archive_email(self):
         """ Test email view for PUT request to archive email """
         # Compose an email
-        data = {'recipients': 'test_user2@example.com', 'subject': 'Test', 'body': 'Test email body'}
+        data = {'recipients': 'test_user2', 'subject': 'Test', 'body': 'Test email body'}
         self.client.post(reverse('compose'), data, content_type='application/json')
 
         # Retrieve the ID of the composed email

@@ -1,12 +1,20 @@
 version: '3'
 
 services:
-    db:
-        image: postgres
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: network
+      POSTGRES_USER: rodrigo
+      POSTGRES_PASSWORD: rodrigo
 
-    web:
-        build: .
-        volumes:
-            - .:/usr/src/app
-        ports:
-            - "8000:8000"
+  redis:
+    image: redis
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis

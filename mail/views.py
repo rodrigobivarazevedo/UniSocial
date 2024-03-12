@@ -19,7 +19,6 @@ def mail(request):
 @csrf_exempt
 @login_required
 def compose(request):
-    print(request)
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 

@@ -32,9 +32,9 @@ class MailTests(TestCase):
         # Test serialization
         serialized_email = email.serialize()
         self.assertEqual(serialized_email['id'], email.id)
-        self.assertEqual(serialized_email['user'], self.user3.email)
-        self.assertEqual(serialized_email['sender'], self.user4.email)
-        self.assertEqual(set(serialized_email['recipients']), {self.user3.email})  # Check recipients as set
+        self.assertEqual(serialized_email['user'], self.user3.username)
+        self.assertEqual(serialized_email['sender'], self.user4.username)
+        self.assertEqual(set(serialized_email['recipients']), {self.user3.username})  # Check recipients as set
         self.assertEqual(serialized_email['subject'], "Test Subject")
         self.assertEqual(serialized_email['body'], "Test Body")
         self.assertEqual(serialized_email['read'], False)
@@ -63,9 +63,9 @@ class MailTests(TestCase):
         # Test serialization
         serialized_email = email.serialize()
         self.assertEqual(serialized_email['id'], email.id)
-        self.assertEqual(serialized_email['user'], self.user3.email)
-        self.assertEqual(serialized_email['sender'], self.user4.email)
-        self.assertEqual(set(serialized_email['recipients']), {self.user3.email, self.user5.email})  # Check recipients as set
+        self.assertEqual(serialized_email['user'], self.user3.username)
+        self.assertEqual(serialized_email['sender'], self.user4.username)
+        self.assertEqual(set(serialized_email['recipients']), {self.user3.username, self.user5.username})  # Check recipients as set
         self.assertEqual(serialized_email['subject'], "Test Subject")
         self.assertEqual(serialized_email['body'], "Test Body")
         self.assertEqual(serialized_email['read'], False)
