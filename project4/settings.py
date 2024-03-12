@@ -90,6 +90,16 @@ DATABASES = {
 
 TEST_DATABASE_TIMEOUT = 60  # Set timeout to 60 seconds (adjust as needed)
 
+test_databases = {}
+for test_label in sys.argv[1:]:
+    test_databases[test_label] = {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': f'test_{test_label.replace(".", "_")}',  # Use the test file name as the database name
+    }
+
+# Override the default test database settings
+TEST = {'default': test_databases}
+
 """
 CACHES = {
     "default": {
