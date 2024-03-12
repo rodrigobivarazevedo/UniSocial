@@ -82,15 +82,16 @@ DATABASES = {
         'NAME': 'network',
         'USER': 'rodrigo',
         'PASSWORD': 'rodrigo',
-        'HOST': 'db',  # Docker Compose service name
+        #'HOST': 'localhost',  # Use the service name defined in docker-compose
         'PORT': '5432',
     }
 }
 
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://redis:6379/1",  # Docker Compose service name
+        "LOCATION": "redis://127.0.0.1:6379/1",  # Redis server address
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }

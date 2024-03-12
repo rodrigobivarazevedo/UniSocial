@@ -1,20 +1,18 @@
 version: '3'
 
 services:
-  db:
-    image: postgres
-    environment:
-      POSTGRES_DB: network
-      POSTGRES_USER: rodrigo
-      POSTGRES_PASSWORD: rodrigo
+    db:
+        image: postgres
+        environment:
+            POSTGRES_PASSWORD: "rodrigo"
+        ports:
+            - "5432:5432"
 
-  redis:
-    image: redis
-
-  web:
-    build: .
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-      - redis
+    web:
+        build: .
+        volumes:
+            - .:/usr/src/app
+        ports:
+            - "8000:8000"
+        depends_on:
+            - db  # Web service depends on the db service being up first
