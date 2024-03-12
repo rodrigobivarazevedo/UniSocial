@@ -82,7 +82,7 @@ DATABASES = {
         'NAME': 'network',
         'USER': 'rodrigo',
         'PASSWORD': 'rodrigo',
-        #'HOST': 'localhost',  # Use the service name defined in docker-compose
+        'HOST': 'localhost',  # Use the service name defined in docker-compose
         'PORT': '5432',
     }
 }
