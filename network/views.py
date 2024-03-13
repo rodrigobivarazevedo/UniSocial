@@ -8,6 +8,7 @@ from django.db.models import Count
 import json
 from django.contrib.auth.decorators import login_required
 #from django.views.decorators.cache import cache_page
+from django.templatetags.static import static
 
 
 from .forms import PostForm, UserProfileForm
@@ -228,13 +229,22 @@ def following(request, username):
         if 'usersfollowing' in request.GET:
             # Query the users that the current user is following
             following_users = UserProfile.objects.filter(followers=user_profile.user)
-            #following_users = user_profile.following.all()
-            following_data = [{'username': profile.user.username} for profile in following_users]
+            following_data = []
+            for profile in following_users:
+                following_data.append({
+                    'username': profile.user.username,
+                    'profile_pic': profile.picture.url if profile.picture else static('network/profile_placeholder.png') # Include profile picture URL if available
+                })
             return JsonResponse({'following_users': following_data})
         elif 'usersfollowers' in request.GET:
             # Query the users who are following the current user
             followers = UserProfile.objects.filter(following=user_profile.user)
-            followers_data = [{'username': profile.user.username} for profile in followers]
+            followers_data = []
+            for profile in followers:
+                followers_data.append({
+                    'username': profile.user.username,
+                    'profile_pic': profile.picture.url if profile.picture else static('network/profile_placeholder.png')  # Include profile picture URL if available
+                })
             return JsonResponse({'followers': followers_data})
         else:
             # If it's not a valid request, render the HTML template
@@ -245,6 +255,7 @@ def following(request, username):
     else:
         # Handle other HTTP methods if needed
         return HttpResponseNotAllowed(['GET'])
+
     
 
 @login_required

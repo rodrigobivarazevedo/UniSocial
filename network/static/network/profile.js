@@ -61,73 +61,57 @@ document.addEventListener('DOMContentLoaded', function() {
         composeModal.hide();
     });
 
-    // Event handler for followers link
     document.querySelector('#follower-link').addEventListener('click', function(e) {
         e.preventDefault();
-
         fetch(`/following/${userProfileUsername}?usersfollowers`)
-            .then(response => response.json()) // Parse response as JSON
+            .then(response => response.json())
             .then(data => {
                 var followersModal = new bootstrap.Modal(document.getElementById('followersModal'));
                 var modalBody = document.getElementById('followersModal').querySelector('.modal-body');
-
-                // Clear previous content
-                modalBody.innerHTML = '';
-
-                // Create a container for followers list
-                var followersList = document.createElement('ul');
-
-                // Iterate through each follower and create list item
+                modalBody.innerHTML = '';  // Clear previous content
                 data.followers.forEach(function(follower) {
-                    var followerItem = document.createElement('li');
-                    followerItem.textContent = follower.username;
-                    followersList.appendChild(followerItem);
+                    var followerItem = document.createElement('div');
+                    var profilePic = document.createElement('img');
+                    profilePic.src = follower.profile_pic ? follower.profile_pic : "";  // Set profile picture URL or placeholder image URL
+                    profilePic.classList.add('img-fluid', 'rounded-circle');  // Add Bootstrap classes for rounded and thumbnail image
+                    profilePic.style.maxWidth = '100px';  // Set maximum width for the image
+                    var username = document.createElement('span');
+                    username.textContent = follower.username;
+                    followerItem.appendChild(profilePic);
+                    followerItem.appendChild(username);
+                    modalBody.appendChild(followerItem);
                 });
-
-                // Append followers list to modal body
-                modalBody.appendChild(followersList);
-
-                // Show modal
                 followersModal.show();
             })
             .catch(error => console.error('Error:', error));
     });
-
-    // Event handler for following link
+    
     document.querySelector('#following-link').addEventListener('click', function(e) {
         e.preventDefault();
-
         fetch(`/following/${userProfileUsername}?usersfollowing`)
-            .then(response => response.json()) // Parse response as JSON
+            .then(response => response.json())
             .then(data => {
                 var followingModal = new bootstrap.Modal(document.getElementById('followingModal'));
                 var modalBody = document.getElementById('followingModal').querySelector('.modal-body');
-
-                // Clear previous content
-                modalBody.innerHTML = '';
-
-                // Create a container for following list
-                var followingList = document.createElement('ul');
-
-                // Iterate through each following user and create list item
+                modalBody.innerHTML = '';  // Clear previous content
                 data.following_users.forEach(function(followingUser) {
-                    var followingItem = document.createElement('li');
-                    followingItem.textContent = followingUser.username;
-                    followingList.appendChild(followingItem);
+                    var followingItem = document.createElement('div');
+                    var profilePic = document.createElement('img');
+                    profilePic.src = followingUser.profile_pic ? followingUser.profile_pic : "";  // Set profile picture URL or placeholder image URL
+                    profilePic.classList.add('img-fluid', 'rounded-circle');  // Add Bootstrap classes for rounded and thumbnail image
+                    profilePic.style.maxWidth = '100px';  // Set maximum width for the image
+                    var username = document.createElement('span');
+                    username.textContent = followingUser.username;
+                    followingItem.appendChild(profilePic);
+                    followingItem.appendChild(username);
+                    modalBody.appendChild(followingItem);
                 });
-
-                // Append following list to modal body
-                modalBody.appendChild(followingList);
-
-                // Show modal
                 followingModal.show();
             })
             .catch(error => console.error('Error:', error));
     });
 
-
-
-
+    
 
 });
 
