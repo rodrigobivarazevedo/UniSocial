@@ -50,6 +50,7 @@ def load_posts(request):
                 'content': post.content,
                 'created_at': post.created_at,
                 'username': post.user.username,
+                'profile_pic': post.user.userprofile.picture.url if post.user.userprofile.picture else static('network/profile_placeholder.png'),
                 'likes_count': likes_count,  # Use precalculated likes count
                 'comments_count': post.comment_set.count()  # Recalculate comments count
             }
@@ -84,6 +85,7 @@ def load_posts(request):
                 'content': post.content,
                 'created_at': post.created_at,
                 'username': post.user.username,
+                'profile_pic': post.user.userprofile.picture.url if post.user.userprofile.picture else static('network/profile_placeholder.png'),
                 'likes_count': likes_count,  # Use precalculated likes count
                 'comments_count': post.comment_set.count()  # Recalculate comments count
             }

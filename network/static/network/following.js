@@ -48,7 +48,8 @@ function loadPosts() {
                     <div class="row">
                         <div class="col-md-8 offset-md-2">
                             <div class="post">
-                                <span style="font-size: 1.25rem; font-weight: bold;" class="username"><a href="/profile/${post.username}/">${post.username}</a></span> <small>(${post.created_at} ago)</small>
+
+                                <span style="font-size: 1.25rem; font-weight: bold;" class="username"><img src="${post.profile_pic}" class="img-fluid rounded-circle" style="max-width: 50px;" alt="Profile Picture">  <a href="/profile/${post.username}/">${post.username}</a></span> <small>(${post.created_at} ago)</small>
                                 <p class="mt-2">${post.content}</p>
                             </div>
 
