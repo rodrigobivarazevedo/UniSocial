@@ -9,6 +9,8 @@ import json
 from django.contrib.auth.decorators import login_required
 #from django.views.decorators.cache import cache_page
 from django.templatetags.static import static
+from django.utils.timesince import timesince
+from django.utils.timezone import now
 
 
 from .forms import PostForm, UserProfileForm
@@ -44,11 +46,11 @@ def load_posts(request):
         for post in posts:
             # Fetch the precalculated likes count
             likes_count = getattr(post, 'likes_count', 0)
-
+            time_difference = timesince(post.created_at, now())
             serialized_post = {
                 'id': post.id,
                 'content': post.content,
-                'created_at': post.created_at,
+                'created_at': time_difference,
                 'username': post.user.username,
                 'profile_pic': post.user.userprofile.picture.url if post.user.userprofile.picture else static('network/profile_placeholder.png'),
                 'likes_count': likes_count,  # Use precalculated likes count
@@ -79,11 +81,11 @@ def load_posts(request):
         for post in posts:
             # Fetch the precalculated likes count
             likes_count = getattr(post, 'likes_count', 0)
-
+            time_difference = timesince(post.created_at, now())
             serialized_post = {
                 'id': post.id,
                 'content': post.content,
-                'created_at': post.created_at,
+                'created_at': time_difference,
                 'username': post.user.username,
                 'profile_pic': post.user.userprofile.picture.url if post.user.userprofile.picture else static('network/profile_placeholder.png'),
                 'likes_count': likes_count,  # Use precalculated likes count
@@ -112,11 +114,11 @@ def load_posts(request):
         for post in posts:
             # Fetch the precalculated likes count
             likes_count = getattr(post, 'likes_count', 0)
-
+            time_difference = timesince(post.created_at, now())
             serialized_post = {
                 'id': post.id,
                 'content': post.content,
-                'created_at': post.created_at,
+                'created_at': time_difference,
                 'username': post.user.username,
                 'likes_count': likes_count,  # Use precalculated likes count
                 'comments_count': post.comment_set.count()  # Recalculate comments count
@@ -138,11 +140,12 @@ def comments(request):
         comments = Comment.objects.filter(post=post_id)
         serialized_comments = []
         for comment in comments:
+            time_difference = timesince(comment.created_at, now())
             serialized_comment = {
                 'id': comment.id,
                 'user': comment.user.username,
                 'content': comment.content, 
-                'time': comment.created_at,
+                'time': time_difference,
             }
             serialized_comments.append(serialized_comment)
 
