@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseNotAllowed, HttpResponseBadRequest
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib import messages
@@ -217,17 +217,35 @@ def profile(request, username):
     return render(request, 'network/profile.html', context)
 
 #@cache_page(60 * 5)  # Cache for 5 minutes
-@login_required
 def following(request, username):
-     # Get the user profile based on the username
+    # Get the user profile based on the username
     user = get_object_or_404(User, username=username)
     user_profile = get_object_or_404(UserProfile, user=user)
     
-    context = {
-        'user_profile': user_profile,
-    }
-    return render(request, 'network/following.html', context)
-
+    # If it's a GET request
+    if request.method == 'GET':
+        # Check if the request is for following or followers
+        if 'usersfollowing' in request.GET:
+            # Query the users that the current user is following
+            following_users = UserProfile.objects.filter(followers=user_profile.user)
+            #following_users = user_profile.following.all()
+            following_data = [{'username': profile.user.username} for profile in following_users]
+            return JsonResponse({'following_users': following_data})
+        elif 'usersfollowers' in request.GET:
+            # Query the users who are following the current user
+            followers = UserProfile.objects.filter(following=user_profile.user)
+            followers_data = [{'username': profile.user.username} for profile in followers]
+            return JsonResponse({'followers': followers_data})
+        else:
+            # If it's not a valid request, render the HTML template
+            context = {
+                'user_profile': user_profile,
+            }
+            return render(request, 'network/following.html', context)
+    else:
+        # Handle other HTTP methods if needed
+        return HttpResponseNotAllowed(['GET'])
+    
 
 @login_required
 def follow(request, username):

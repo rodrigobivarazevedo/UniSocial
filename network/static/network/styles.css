@@ -4,3 +4,15 @@
     display: inline-block;
     margin-right: 5px; /* Adjust margin as needed */
 }
+
+/* remove highlight in anchor tags */
+a {
+    text-decoration: none;
+    color: inherit; /* Inherit the color from the parent element */
+}
+
+a:hover,
+a:focus {
+    text-decoration: none;
+    color: inherit; /* Inherit the color from the parent element */
+}

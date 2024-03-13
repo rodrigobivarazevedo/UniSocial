@@ -30,7 +30,8 @@
                         <div class="col-md-3">
                             <!-- User Profile Information -->
                             <h1>{{ user_profile.user.username }}</h1>
-                            <p>Followers: {{ user_profile.followers.count }}  Following: {{ user_profile.following.count }}</p>
+                            <a href="#" id="follower-link" data-toggle="modal" data-target="#followersModal">Followers: {{ user_profile.followers.count }}</a>  <a href="#" id="following-link" data-toggle="modal" data-target="#followingModal">Following: {{ user_profile.following.count }}</a>
+
     
                             {% if can_follow %}
                                 {% if is_following %}
@@ -62,6 +63,37 @@
                 </div>
             </div>
         </div>
+
+        <!-- Followers Modal -->
+        <div class="modal fade" id="followersModal" tabindex="-1" aria-labelledby="followersModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="followersModalLabel">Followers</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                <!-- Content will be loaded dynamically here -->
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Following Modal -->
+        <div class="modal fade" id="followingModal" tabindex="-1" aria-labelledby="followingModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="followingModalLabel">Following</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                <!-- Content will be loaded dynamically here -->
+                </div>
+            </div>
+            </div>
+        </div>
+  
 
         <!-- Modal for composing a message -->
         <div class="modal fade" id="composeModal" tabindex="-1" aria-labelledby="composeModalLabel" aria-hidden="true">

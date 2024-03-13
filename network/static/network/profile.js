@@ -12,25 +12,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, 5000); // 5000 milliseconds = 5 seconds
 
-    document.querySelector('#messagebutton').addEventListener('click', function() {
-        // Show the compose modal
-        var composeModal = new bootstrap.Modal(document.getElementById('composeModal'));
-        composeModal.show();
-      });
+    var messageButton = document.querySelector('#messagebutton');
+    if (messageButton) {
+        messageButton.addEventListener('click', function() {
+            // Show the compose modal
+            var composeModal = new bootstrap.Modal(document.getElementById('composeModal'));
+            composeModal.show();
+        });
+    }
 
-      // Add event listener for form submission
-      document.querySelector('#compose-form').addEventListener('submit', function(event) {
+
+    // Add event listener for form submission
+    document.querySelector('#compose-form').addEventListener('submit', function(event) {
         event.preventDefault();
-    
+
         const body = document.querySelector('#message').value;
         const csrftoken = getCookie('csrftoken');
-    
+
         // Send email data to server
         fetch('/mail/emails', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': csrftoken // Include CSRF token in headers
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken // Include CSRF token in headers
             },
             body: JSON.stringify({
                 recipients: userProfileUsername,
@@ -51,13 +55,80 @@ document.addEventListener('DOMContentLoaded', function() {
             // Handle network errors
             console.error('Error:', error);
         });
-    
+
         // Close the modal after sending the message
         var composeModal = bootstrap.Modal.getInstance(document.getElementById('composeModal'));
         composeModal.hide();
     });
-    
-    
+
+    // Event handler for followers link
+    document.querySelector('#follower-link').addEventListener('click', function(e) {
+        e.preventDefault();
+
+        fetch(`/following/${userProfileUsername}?usersfollowers`)
+            .then(response => response.json()) // Parse response as JSON
+            .then(data => {
+                var followersModal = new bootstrap.Modal(document.getElementById('followersModal'));
+                var modalBody = document.getElementById('followersModal').querySelector('.modal-body');
+
+                // Clear previous content
+                modalBody.innerHTML = '';
+
+                // Create a container for followers list
+                var followersList = document.createElement('ul');
+
+                // Iterate through each follower and create list item
+                data.followers.forEach(function(follower) {
+                    var followerItem = document.createElement('li');
+                    followerItem.textContent = follower.username;
+                    followersList.appendChild(followerItem);
+                });
+
+                // Append followers list to modal body
+                modalBody.appendChild(followersList);
+
+                // Show modal
+                followersModal.show();
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
+    // Event handler for following link
+    document.querySelector('#following-link').addEventListener('click', function(e) {
+        e.preventDefault();
+
+        fetch(`/following/${userProfileUsername}?usersfollowing`)
+            .then(response => response.json()) // Parse response as JSON
+            .then(data => {
+                var followingModal = new bootstrap.Modal(document.getElementById('followingModal'));
+                var modalBody = document.getElementById('followingModal').querySelector('.modal-body');
+
+                // Clear previous content
+                modalBody.innerHTML = '';
+
+                // Create a container for following list
+                var followingList = document.createElement('ul');
+
+                // Iterate through each following user and create list item
+                data.following_users.forEach(function(followingUser) {
+                    var followingItem = document.createElement('li');
+                    followingItem.textContent = followingUser.username;
+                    followingList.appendChild(followingItem);
+                });
+
+                // Append following list to modal body
+                modalBody.appendChild(followingList);
+
+                // Show modal
+                followingModal.show();
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
+
+
+
+
 });
 
 
