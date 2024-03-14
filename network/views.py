@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.templatetags.static import static
 from django.utils.timesince import timesince
 from django.utils.timezone import now
+from django.db.models import Q
 
 
 from .forms import PostForm, UserProfileForm
@@ -305,6 +306,29 @@ def edit_profile(request):
         form = UserProfileForm(instance=request.user.userprofile)
     return render(request, 'network/edit_profile.html', {'form': form})
 
+
+
+def search_users(request):
+    if request.method == 'GET' and 'query' in request.GET:
+        query = request.GET.get('query', '')
+        if query:
+        
+            # Filter users based on username starting with the query
+            users = User.objects.filter(username__startswith=query)
+            # Filter user profiles based on the associated user objects
+            user_profiles = UserProfile.objects.filter(user__in=users)
+            # Serialize the users' data
+            serialized_users = [{'username': profile.user.username,
+                                'profile_pic': profile.picture.url if profile.picture else static('network/profile_placeholder.png')}
+                                for profile in user_profiles]
+            # Return the serialized data as JSON response
+            return JsonResponse({'users': serialized_users})
+        else: 
+            return JsonResponse({'users': ""})
+    else:
+        # If the request method is not GET or query parameter is missing, return an error response
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+    
 
 def login_view(request):
     if request.method == "POST":
