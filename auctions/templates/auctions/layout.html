@@ -1,22 +1,24 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{% block title %}Auctions{% endblock %}</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link href="{% static 'auctions/styles.css' %}" rel="stylesheet">
+    <title>{% block title %}Social Network{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'network/styles.css' %}" rel="stylesheet">
+    {% block script %}
+    {% endblock %}
 </head>
 <body>
-    <!-- Top Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="{% url 'index' %}">Network</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavTop" aria-controls="navbarNavTop" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavTop">
-            <ul class="navbar-nav mr-auto">
-                {% if user.is_authenticated %}
+
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- Left sidebar -->
+        <div class="col-lg-2 position-fixed vh-100 bg-light">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light flex-column">
+                <a class="navbar-brand mb-3" href="{% url 'index' %}">Network</a>
+                <ul class="navbar-nav flex-column">
+                    {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'profile' user.username %}"><strong>{{ user.username }}</strong></a>
                     </li>
@@ -26,54 +28,65 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'mail' %}">Messages</a>
                     </li>
-                    
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'auctions' %}">Offers</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
                     </li>
-                {% else %}
+                    {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'login' %}">Log In</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'register' %}">Register</a>
                     </li>
-                {% endif %}
-            </ul>
-        </div>
-    </nav>
-
-       
-        <!-- Bottom Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="collapse navbar-collapse" id="navbarNavBottom">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'auctions' %}">Active Listings</a>
-                    </li>
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'create_listing' %}">Create a listing</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
-                        </li>
                     {% endif %}
                 </ul>
+            </nav>
+        </div>
+
+        <!-- Middle content -->
+        <div class="col-lg-7 offset-lg-2">
+            <div class="body">
+                <!-- Middle Navbar -->
+                <nav class="navbar navbar-expand-lg navbar bg">
+                    <div class="collapse navbar-collapse">
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'auctions' %}">Active Listings</a>
+                            </li>
+                            {% if user.is_authenticated %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'create_listing' %}">Create a listing</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </nav>
+                {% block body %}
+                {% endblock %}
             </div>
-        </nav>
-     
+        </div>
 
-    <div class="container mt-4">
-        {% block body %}
-        {% endblock %}
+        <!-- Right sidebar -->
+        <div class="col-lg-3 position-fixed vh-100 d-none d-lg-block bg-light" style="right: 0;">
+            <div class="search-box mt-3">
+                <input type="text" class="form-control" style="width: 80%;" placeholder="Search">
+                <!-- Add search functionality here -->
+            </div>
+        </div>
+
     </div>
+</div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js" integrity="sha384-Gcf26q/mSBDhp4mRc4Zj5r8MawbdK4JxL0n9aUikvHZpHvuuq4J8O/KO/dgYL5K0" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-EVSTQN3/azprV+60K5tCsgxpW2X7ZAd5w8R6E8Jf6MV+aPNOl+hjUmarJ4o5omlw" crossorigin="anonymous"></script>
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js" integrity="sha384-Gcf26q/mSBDhp4mRc4Zj5r8MawbdK4JxL0n9aUikvHZpHvuuq4J8O/KO/dgYL5K0" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-EVSTQN3/azprV+60K5tCsgxpW2X7ZAd5w8R6E8Jf6MV+aPNOl+hjUmarJ4o5omlw" crossorigin="anonymous"></script>
+
 </body>
 </html>

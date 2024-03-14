@@ -16,3 +16,30 @@ a:focus {
     text-decoration: none;
     color: inherit; /* Inherit the color from the parent element */
 }
+
+
+
+/* Adjustments for small screens */
+@media (max-width: 768px) {
+    .col-lg-2,
+    .col-lg-8,
+    .col-lg-2 {
+        width: 100%;
+    }
+}
+
+/* Custom CSS for styling */
+.search-box {
+    position: sticky;
+    top: 20px;
+}
+
+/* Custom CSS to override Bootstrap styles */
+.search-box input[type="text"] {
+    width: 80%; /* Adjust the width as needed */
+}
+
+.body {
+    margin-top: 20px;
+    /* Adjust margin as needed */
+}

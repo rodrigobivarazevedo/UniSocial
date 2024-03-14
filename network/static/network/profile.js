@@ -74,9 +74,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     var profilePic = document.createElement('img');
                     profilePic.src = follower.profile_pic ? follower.profile_pic : "";  // Set profile picture URL or placeholder image URL
                     profilePic.classList.add('img-fluid', 'rounded-circle');  // Add Bootstrap classes for rounded and thumbnail image
-                    profilePic.style.maxWidth = '100px';  // Set maximum width for the image
-                    var username = document.createElement('span');
-                    username.textContent = follower.username;
+                    profilePic.style.maxWidth = '50px';  // Set maximum width for the image
+                    profilePic.style.marginRight = '10px';
+                    var username = document.createElement('a'); // Changed to anchor tag
+                    username.href = `/profile/${follower.username}/`; // Set the href attribute
+                    username.textContent = follower.username; // Set the text content
+                    username.classList.add('ml-2'); // Add left margin for space between picture and username
                     followerItem.appendChild(profilePic);
                     followerItem.appendChild(username);
                     modalBody.appendChild(followerItem);
@@ -85,6 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => console.error('Error:', error));
     });
+    
     
     document.querySelector('#following-link').addEventListener('click', function(e) {
         e.preventDefault();
@@ -99,9 +103,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     var profilePic = document.createElement('img');
                     profilePic.src = followingUser.profile_pic ? followingUser.profile_pic : "";  // Set profile picture URL or placeholder image URL
                     profilePic.classList.add('img-fluid', 'rounded-circle');  // Add Bootstrap classes for rounded and thumbnail image
-                    profilePic.style.maxWidth = '100px';  // Set maximum width for the image
-                    var username = document.createElement('span');
-                    username.textContent = followingUser.username;
+                    profilePic.style.maxWidth = '50px';  // Set maximum width for the image
+                    profilePic.style.marginRight = '10px';
+                    var username = document.createElement('a'); // Changed to anchor tag
+                    username.href = `/profile/${followingUser.username}/`; // Set the href attribute
+                    username.textContent = followingUser.username; // Set the text content
+                    username.classList.add('ml-2'); // Add left margin for space between picture and username
                     followingItem.appendChild(profilePic);
                     followingItem.appendChild(username);
                     modalBody.appendChild(followingItem);
@@ -110,6 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => console.error('Error:', error));
     });
+    
 
     
 
