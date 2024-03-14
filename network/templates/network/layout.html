@@ -33,6 +33,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'auctions' %}">Offers</a>
                     </li>
+
+                    <button type="button" class="btn btn-primary" id="newPostButton" data-bs-toggle="modal" data-bs-target="#newPostModal">
+                        New Post
+                    </button>
+
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
                     </li>
@@ -70,7 +75,34 @@
     </div>
 </div>
 
+
+<!-- Modal for creating a new post -->
+<div class="modal fade" id="newPostModal" tabindex="-1" aria-labelledby="newPostModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Modal header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="newPostModalLabel">Create New Post</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" data-bs-target="#newPostModal" aria-label="Close"></button>
+            </div>
+            <!-- Modal body -->
+            <div class="modal-body">
+                <!-- Form for creating a new post -->
+                <form id="newPostForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <textarea class="form-control" id="content" name="content" rows="4" maxlength="280" required></textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="submitPostButton">Post</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 </body>
 <script src="{% static 'network/search.js' %}"></script>
+
 </html>
 

@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Get the search input element
     const searchInput = document.getElementById('search-input');
-
+    const newPostButton = document.getElementById('newPostButton');
+    const newPostModal = new bootstrap.Modal(document.getElementById('newPostModal'));
     // Add event listener for keyup event
     searchInput.addEventListener('keyup', async function(event) {
         // Get the search query
@@ -18,6 +19,13 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
         }
     });
+
+    newPostButton.addEventListener('click', function() {
+        const newPostModal = new bootstrap.Modal(document.getElementById('newPostModal'));
+        newPostModal.show();
+    });
+
+    
 
     // Function to display search results
     function displaySearchResults(data) {
@@ -40,4 +48,45 @@ document.addEventListener('DOMContentLoaded', function() {
             searchResultsContainer.appendChild(searchResultItem);
         });
     }
+
+    // Handle form submission inside the modal
+    submitPostButton.addEventListener('click', function() {
+        const formData = new FormData(document.getElementById('newPostForm'));
+
+        fetch('/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            window.location.reload();  // Reload the page after successful submission
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Handle errors or display error messages to the user
+        });
+    });
+
+    // Function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+}
 });
+
