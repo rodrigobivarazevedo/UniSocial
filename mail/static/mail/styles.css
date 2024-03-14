@@ -2,10 +2,19 @@ textarea {
     min-height: 400px;
 }
 
-
-
 .list-group-item:hover {
 background-color: #ffffff; /* white background on hover */
 cursor: pointer; /* Change cursor to pointer on hover */
 }
 
+/* remove highlight in anchor tags */
+a {
+    text-decoration: none;
+    color: inherit; /* Inherit the color from the parent element */
+}
+
+a:hover,
+a:focus {
+    text-decoration: none;
+    color: inherit; /* Inherit the color from the parent element */
+}

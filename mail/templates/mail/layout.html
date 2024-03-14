@@ -59,13 +59,16 @@
         <!-- Right sidebar -->
         <div class="col-lg-3 position-fixed vh-100 d-none d-lg-block bg-light" style="right: 0;">
             <div class="search-box mt-3">
-                <input type="text" class="form-control" style="width: 80%;" placeholder="Search">
+                <input id="search-input" type="text" class="form-control" style="width: 80%;" placeholder="Search">
                 <!-- Add search functionality here -->
             </div>
+            <!-- Container for search results -->
+            <div id="search-results" class="mt-3"></div>
         </div>
 
     </div>
 </div>
 
 </body>
+<script src="{% static 'network/search.js' %}"></script>
 </html>
