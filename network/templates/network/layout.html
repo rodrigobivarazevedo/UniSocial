@@ -54,7 +54,7 @@
                 {% endblock %}
             </div>
         </div>
-
+        {% if user.is_authenticated %}
         <!-- Right sidebar -->
         <div class="col-lg-3 position-fixed vh-100 d-none d-lg-block bg-light" style="right: 0;">
             <div class="search-box mt-3">
@@ -62,7 +62,7 @@
                 <!-- Add search functionality here -->
             </div>
         </div>
-
+        {% endif %}
     </div>
 </div>
 
