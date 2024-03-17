@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.contrib import messages
 from django.db.models import Count
 import json
+import re
 from django.contrib.auth.decorators import login_required
 #from django.views.decorators.cache import cache_page
 from django.templatetags.static import static
@@ -15,22 +16,32 @@ from django.db.models import Q
 
 
 from .forms import PostForm, UserProfileForm
-from .models import Post, Comment, Like, UserProfile, User
+from .models import Post, Comment, Like, UserProfile, User, Hashtag
 
     
 def index(request):
+    form = PostForm()  # Create an instance of the PostForm
     if request.method == 'POST':
         form = PostForm(request.POST)
         if form.is_valid():
             post = form.save(commit=False)
             post.user = request.user
             post.save()
+
+            # Extract hashtags from the form input
+            hashtags_input = request.POST.get('hashtags', '')  # Get the input from the form
+            hashtags = re.findall(r'#(\w+)', hashtags_input)  # Extract hashtags using regular expression
+            # Associate hashtags with the post
+            for tag in hashtags:
+                hashtag, created = Hashtag.objects.get_or_create(tag=tag)  # Get or create hashtag object
+                post.hashtags.add(hashtag)  # Associate hashtag with the post
+
             messages.success(request, 'Your post was successfully posted!')
             request.session['messages'] = []
 
             post_id = post.id  # Assign the post ID
-        return render(request, 'network/index.html', {'post_id': post_id})
-    return render(request, "network/index.html")
+            return render(request, 'network/index.html', {'post_id': post_id, 'form': form})
+    return render(request, "network/index.html", {'form': form})
 
 
 @login_required
@@ -296,6 +307,7 @@ def unfollow(request, username):
 
     return redirect('profile', username=username)
 
+@login_required
 def edit_profile(request):
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
@@ -307,28 +319,60 @@ def edit_profile(request):
     return render(request, 'network/edit_profile.html', {'form': form})
 
 
-
+@login_required
 def search_users(request):
     if request.method == 'GET' and 'query' in request.GET:
         query = request.GET.get('query', '')
         if query:
         
             # Filter users based on username starting with the query
-            users = User.objects.filter(username__startswith=query)
+            users = User.objects.filter(username__startswith=query.lower())[:4]
+            if not users:
+                users = User.objects.filter(username__startswith=query)[:4]
+            
+            hashtags = Hashtag.objects.filter(tag__istartswith=query)[:4]
+            
             # Filter user profiles based on the associated user objects
             user_profiles = UserProfile.objects.filter(user__in=users)
             # Serialize the users' data
             serialized_users = [{'username': profile.user.username,
                                 'profile_pic': profile.picture.url if profile.picture else static('network/profile_placeholder.png')}
                                 for profile in user_profiles]
+            # Serialize hashtag data
+            serialized_hashtags = [{'name': hashtag.tag}
+                                   for hashtag in hashtags]
+
             # Return the serialized data as JSON response
-            return JsonResponse({'users': serialized_users})
-        else: 
-            return JsonResponse({'users': ""})
+            return JsonResponse({'users': serialized_users, 'hashtags': serialized_hashtags})
+        else:
+            return JsonResponse({'users': "", 'hashtags': ""})
     else:
         # If the request method is not GET or query parameter is missing, return an error response
         return JsonResponse({'error': 'Invalid request'}, status=400)
-    
+
+def search_posts(request):
+    if request.method == 'GET':
+        query = request.GET.get('query', '')
+        if query:
+            # Search for posts by username
+            posts_by_user = Post.objects.filter(user__username__icontains=query).order_by('-created_at')[:5]
+
+            # Search for posts by hashtag
+            hashtags = Hashtag.objects.filter(tag__icontains=query)[:4]
+            posts_by_hashtag = Post.objects.filter(hashtags__in=hashtags).order_by('-created_at')[:5]
+
+            # Combine the results
+            serialized_posts_by_user = [{'id': post.id, 'content': post.content, 'username': post.user.username, "created": timesince(post.created_at, now()), "hashtags": [tag.tag for tag in post.hashtags.all()]} for post in posts_by_user]
+            serialized_posts_by_hashtag = [{'id': post.id, 'content': post.content, 'username': post.user.username, "created": timesince(post.created_at, now()), "hashtags": [tag.tag for tag in post.hashtags.all()]} for post in posts_by_hashtag]
+
+            # Return the serialized data as JSON response
+            return JsonResponse({'posts_by_user': serialized_posts_by_user, 'posts_by_hashtag': serialized_posts_by_hashtag})
+
+    # If the request method is not GET or query parameter is missing, return an error response
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def search_view(request):
+    return render(request, 'network/search.html')
 
 def login_view(request):
     if request.method == "POST":

@@ -21,5 +21,9 @@ urlpatterns = [
     path('unfollow/<str:username>/', views.unfollow, name='unfollow'),
     path('following/<str:username>/', views.following, name='following'),
     path('edit_profile/', views.edit_profile, name='edit_profile'),
-    path('search/', views.search_users, name='search_users'),
+    path('search/users', views.search_users, name='search_users'),
+    path('search/posts', views.search_posts, name='search_posts'),
+    path('search/', views.search_view, name='search_view'),
+
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

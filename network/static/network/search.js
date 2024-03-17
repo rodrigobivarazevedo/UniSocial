@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Perform the asynchronous JavaScript call to Django backend
         try {
-            const response = await fetch(`/search/?query=${query}`);
+            const response = await fetch(`/search/users?query=${query}`);
             const data = await response.json();
             
             // Update UI with the response data
@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var searchResultsContainer = document.getElementById('search-results');
         searchResultsContainer.innerHTML = '';  // Clear previous content
         
+        // Display users
         data.users.forEach(function(user) {
             var searchResultItem = document.createElement('div');
             var profilePic = document.createElement('img');
@@ -47,6 +48,37 @@ document.addEventListener('DOMContentLoaded', function() {
             searchResultItem.appendChild(username);
             searchResultsContainer.appendChild(searchResultItem);
         });
+
+       // Display hashtags
+        data.hashtags.forEach(function(hashtag) {
+            var hashtagElement = document.createElement('div'); // Create a div element for each hashtag
+            var hashtagLink = document.createElement('a'); // Create an anchor element for the hashtag link
+            hashtagLink.textContent = `#${hashtag.name}`; // Set the text content
+            hashtagLink.style.fontWeight = 'bold'; // Make the hashtag text bold
+            hashtagLink.style.cursor = 'pointer'; // Set cursor to pointer for better UX
+            hashtagElement.appendChild(hashtagLink); // Append the hashtag link to the div
+            searchResultsContainer.appendChild(hashtagElement); // Append the div to the container
+
+            // Add event listener to the hashtag link
+            hashtagLink.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default link behavior
+                var query = hashtag.name; // Get the hashtag name
+                // Perform AJAX call
+                fetch(`/search/posts?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Load search.html page with received data
+                    // You may need to adjust this part based on your implementation
+                    // For simplicity, assuming the entire page needs to be replaced
+                    document.documentElement.innerHTML = data; // Replace entire HTML with search.html content
+                })
+                .catch(error => {
+                    console.error('Error searching posts:', error);
+                });
+            });
+        });
+
+
     }
 
     // Handle form submission inside the modal
