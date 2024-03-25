@@ -16,17 +16,35 @@ document.addEventListener('DOMContentLoaded', function() {
             alert.remove();
         });
     }, 5000); // 5000 milliseconds = 5 seconds
+
+    // Initialize Intersection Observer
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                // Show the spinner for a delay before loading more posts
+                setTimeout(() => {
+                    loadPosts();
+                }, 1000); // Adjust the delay time as needed (in milliseconds)
+            }
+        });
+    });
+
+    // Specify the target element to observe (loading spinner)
+    const targetElement = document.getElementById('loadingSpinner');
+    observer.observe(targetElement);
 });
 
 
 // Event listener for scrolling
-window.onscroll = () => {
+//window.onscroll = () => {
     // Check if we're at the bottom
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-        loadPosts();
-    } 
-};
+   // if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+   //     loadPosts();
+   // } 
+//};
  
+
+
   
 // Load next set of posts
 function loadPosts() {
