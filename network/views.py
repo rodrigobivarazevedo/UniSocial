@@ -13,7 +13,7 @@ from django.templatetags.static import static
 from django.utils.timesince import timesince
 from django.utils.timezone import now
 from django.db.models import Q
-
+import requests
 
 from .forms import PostForm, UserProfileForm
 from .models import Post, Comment, Like, UserProfile, User, Hashtag
@@ -371,8 +371,39 @@ def search_posts(request):
     # If the request method is not GET or query parameter is missing, return an error response
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
+
 def search_view(request):
-    return render(request, 'network/search.html')
+    if 'query' in request.GET:
+        query = request.GET['query']
+       
+        hashtags = Hashtag.objects.filter(tag=query)[:10]
+        posts = Post.objects.filter(hashtags__in=hashtags).prefetch_related('comment_set').annotate(
+            likes_count=Count('like')).order_by('-created_at')[:10]
+
+
+        serialized_posts = []
+        for post in posts:
+            # Fetch the precalculated likes count
+            likes_count = getattr(post, 'likes_count', 0)
+            time_difference = timesince(post.created_at, now())
+            serialized_post = {
+                'id': post.id,
+                'content': post.content,
+                'created_at': time_difference,
+                'username': post.user.username,
+                'profile_pic': post.user.userprofile.picture.url if post.user.userprofile.picture else static('network/profile_placeholder.png'),
+                'likes_count': likes_count,  # Use precalculated likes count
+                'comments_count': post.comment_set.count()  # Recalculate comments count
+            }
+            serialized_posts.append(serialized_post)
+
+        data = {
+            'posts': serialized_posts,
+        }
+        return JsonResponse(data, safe=True, status=200)
+        
+    else:
+        return render(request, 'network/search.html')  # Render the search page without any results initially
 
 def login_view(request):
     if request.method == "POST":
